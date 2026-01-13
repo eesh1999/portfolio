@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Lore | Eeshitvaa</title>
+    
+    <!-- FONTS -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&family=Syne:wght@700;800&family=Reenie+Beanie&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            /* Theme Variables */
+            --bg: #F4F2EE;
+            --ink: #111111;
+            --accent: #FF3B30;
+            --font-display: 'Syne', sans-serif;
+            --font-body: 'Space Grotesk', sans-serif;
+            --font-doodle: 'Reenie Beanie', cursive;
+            --paper-grain: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E");
+        }
+
+        /* --- 1. CORE ACCESSIBILITY & RESET --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            background-color: var(--bg);
+            color: var(--ink);
+            font-family: var(--font-body);
+            line-height: 1.4;
+            overflow-x: hidden;
+            transition: background-color 0.4s cubic-bezier(0.23, 1, 0.32, 1), color 0.4s;
+        }
+
+        .texture-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: var(--paper-grain);
+            pointer-events: none; z-index: 9999;
+        }
+
+        /* --- 2. INTELLIGENT CURSOR --- */
+        .cursor-dot, .cursor-circle { display: none; }
+        
+        @media (hover: hover) and (pointer: fine) {
+            * { cursor: none; } 
+            
+            .cursor-dot {
+                display: block;
+                position: fixed; width: 6px; height: 6px;
+                background: var(--accent); border-radius: 50%;
+                pointer-events: none; z-index: 10001;
+                transform: translate(-50%, -50%);
+            }
+            .cursor-circle {
+                display: block;
+                position: fixed; width: 40px; height: 40px;
+                border:1.5px solid var(--ink); border-radius: 50%;
+                pointer-events: none; z-index: 10000;
+                transform: translate(-50%, -50%);
+                transition: width 0.3s, height 0.3s, border-color 0.3s, background-color 0.3s, border-radius 0.3s;
+                mix-blend-mode: difference;
+                background: white; 
+            }
+        }
+
+        /* --- HAMBURGER ICON STYLES --- */
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            justify-content: space-between;
+            width: 35px; /* Made slightly larger for easier clicking */
+            height: 24px;
+            background: transparent;
+            border: none;
+            z-index: 10002; /* Very high z-index to ensure clicks work */
+            cursor: pointer;
+            padding: 5px; /* Larger click area */
+            mix-blend-mode: normal; /* FIX: Force normal blend mode */
+        }
+
+        .bar {
+            width: 100%;
+            height: 3px;
+            background-color: var(--ink); /* FIX: Solid black/ink color always visible */
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        /* Hamburger to X Animation */
+        .hamburger.active .bar:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 6px);
+        }
+        .hamburger.active .bar:nth-child(2) {
+            opacity: 0;
+        }
+        .hamburger.active .bar:nth-child(3) {
+            transform: rotate(-45deg) translate(5px, -6px);
+        }
+
+        /* --- 3. NAVIGATION --- */
+        .top-bar {
+            position: fixed; top: 0; left: 0; width: 100%;
+            padding: 40px 5vw;
+            display: flex; justify-content: space-between; align-items: center;
+            z-index: 100; 
+            mix-blend-mode: difference; 
+            color: white; 
+            transition: all 0.3s ease;
+            /* Fix: Add background when mobile is open to prevent visual mess */
+        }
+        .top-bar.mobile-open {
+            mix-blend-mode: normal;
+            color: var(--ink);
+            background: rgba(244, 242, 238, 0.95);
+            border-bottom: 1px solid var(--ink);
+        }
+        
+        .logo { 
+            font-weight: 700; 
+            font-family: var(--font-body);
+            font-size: 1.3rem; 
+            text-decoration: none; 
+            color: inherit; 
+            letter-spacing: -0.5px;
+            z-index: 101;
+        }
+        
+        .nav-links { 
+            display: flex; 
+            gap: 50px; 
+            z-index: 101;
+        }
+        
+        .nav-link { 
+            text-decoration: none; 
+            color: inherit; 
+            font-size: 0.9rem; 
+            font-weight: 500; 
+            text-transform: uppercase; 
+            letter-spacing: 1px; 
+            position: relative;
+        }
+
+        .nav-link.primary {
+            font-weight: 800;
+            border-bottom: 2px solid currentColor;
+        }
+
+        /* --- 4. HERO SECTION --- */
+        .hero {
+            /* CHANGED: Added min-height to make it full screen and adjusted padding */
+            min-height: 100vh; 
+            padding: 120px 5vw 50px;
+            
+            display: grid; 
+            grid-template-columns: 1fr 1.5fr;
+            gap: 5vw; 
+            align-items: center;
+        }
+
+        .hero-visual { 
+            position: relative; 
+            display: flex; 
+            justify-content: flex-end; 
+            padding-right: 40px; 
+        }
+
+        .photo-frame {
+            position: relative; z-index: 2;
+            background: white; padding: 15px 15px 50px;
+            border: 2px solid var(--ink);
+            transform: rotate(-3deg);
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 15px 15px 0px rgba(0,0,0,0.05);
+            max-width: 280px; 
+        }
+        
+        .photo-frame:hover, .photo-frame:active { 
+            transform: rotate(2deg) scale(1.02); 
+        }
+        
+        .photo-frame img { width: 100%; height: auto; display: block; filter: grayscale(100%); transition: 0.4s; }
+        .photo-frame:hover img, .photo-frame:active img { filter: grayscale(0%); }
+
+        .sticker-tag {
+            position: absolute; top: -15px; right: -5px;
+            background: var(--accent); color: white;
+            padding: 6px 14px; font-family: var(--font-doodle);
+            font-size: 1.3rem; transform: rotate(15deg);
+            z-index: 5; pointer-events: none;
+            box-shadow: 3px 3px 0px var(--ink);
+        }
+
+        .hero-title { font-family: var(--font-display); font-size: clamp(3rem, 6vw, 5.5rem); line-height: 1; margin-bottom: 30px; font-weight: 900; }
+        .hero-title .name-red { 
+            font-family: var(--font-doodle); 
+            color: var(--accent); 
+            font-size: 1.1em; 
+            font-weight: 400; 
+            display: inline-block; 
+            transform: rotate(-2deg);
+            margin-left: 10px;
+        }
+
+        .bio-lead { font-size: 1.6rem; max-width: 700px; margin-bottom: 20px; line-height: 1.3; font-weight: 500; }
+        .bio-lead strong { font-weight: 800; }
+        .bio-sub { font-size: 1.5rem; max-width: 700px; margin-bottom: 30px; line-height: 1.3; }
+        .cat-doodle { font-family: var(--font-doodle); color: var(--accent); font-size: 1.8rem; }
+        
+        .tags { display: flex; flex-wrap: wrap; gap: 10px; }
+        .tag {
+            padding: 8px 18px; border: 1.5px solid var(--ink);
+            border-radius: 50px; font-size: 0.9rem; font-weight: 700;
+            transition: 0.3s; background: transparent;
+        }
+        .tag:hover { background: var(--ink); color: var(--bg); transform: translateY(-3px); }
+
+        /* --- 5. SPICE METER --- */
+        .spice-section {
+            padding: 100px 5vw;
+            border-top: 2px solid var(--ink); border-bottom: 2px solid var(--ink);
+            background: #fff; text-align: center;
+            transition: background 0.4s;
+        }
+        .spice-meter-title { font-family: var(--font-display); font-size: 3rem; text-transform: uppercase; margin-bottom: 20px; }
+        .slider-ui { max-width: 600px; margin: 40px auto; position: relative; }
+        
+        input[type=range] { width: 100%; -webkit-appearance: none; background: transparent; }
+        input[type=range]::-webkit-slider-runnable-track { height: 2px; background: var(--ink); }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none; height: 35px; width: 35px;
+            background: var(--accent); border: 2px solid var(--ink);
+            border-radius: 50%; margin-top: -16px;
+            box-shadow: 4px 4px 0px var(--ink); transition: 0.2s;
+        }
+        .vibe-output { font-family: var(--font-display); font-size: 6vw; font-weight: 900; margin-top: 20px; }
+        .vibe-subtitle { font-family: var(--font-doodle); font-size: 2.5rem; color: var(--accent); }
+
+        /* --- 6. HOBBIES & SKILLS --- */
+        .chaos-section {
+            padding: 120px 5vw;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            position: relative;
+        }
+
+        .toolkit-container h2 { font-family: var(--font-display); font-size: 3.5rem; margin-bottom: 40px; }
+        .toolkit-list { display: flex; flex-direction: column; gap: 20px; }
+        
+        .tool-item {
+            display: flex; justify-content: space-between; align-items: baseline;
+            border-bottom: 2px solid var(--ink);
+            padding: 10px 0;
+            transition: 0.3s;
+        }
+        .tool-item:hover { transform: translateX(10px); }
+        .tool-name { font-size: 1.8rem; font-weight: 700; }
+        .tool-humor { 
+            font-family: var(--font-doodle); 
+            font-size: 1.6rem; 
+            color: var(--accent); 
+            transform: rotate(-2deg);
+        }
+
+        .quest-container { position: relative; }
+        .quest-header { text-align: right; margin-bottom: 20px; }
+        .quest-header h2 { font-family: var(--font-display); font-size: 3.5rem; }
+        
+        .polaroid-pile {
+            position: relative;
+            height: 500px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .polaroid {
+            position: absolute;
+            background: white;
+            padding: 12px 12px 50px 12px;
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.15);
+            width: 260px;
+            border: 1px solid #ddd;
+            transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .polaroid img {
+            width: 100%;
+            height: 280px;
+            object-fit: cover;
+            filter: grayscale(20%);
+            transition: filter 0.6s ease;
+        }
+
+        .polaroid-caption {
+            position: absolute;
+            bottom: 10px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            font-family: var(--font-doodle);
+            font-size: 1.6rem;
+            color: var(--ink);
+        }
+
+        .polaroid:hover, .polaroid:active { 
+            z-index: 10 !important; 
+            transform: scale(1.05) rotate(0deg) !important; 
+            filter: drop-shadow(0px 10px 20px rgba(0,0,0,0.15)); 
+        }
+        .polaroid:hover img, .polaroid:active img { filter: grayscale(0%); }
+
+        .p1 { transform: rotate(-8deg) translate(-50px, -20px); z-index: 1; }
+        .p2 { transform: rotate(12deg) translate(60px, 40px); z-index: 2; }
+        .p3 { transform: rotate(-3deg) translate(20px, -60px); z-index: 3; }
+
+
+        /* --- 7. THE DEEP END --- */
+        .deep-end {
+            height: 80vh; background: #0047FF; color: white;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            position: relative; overflow: hidden; text-align: center;
+        }
+        .water-text { font-family: var(--font-display); font-size: clamp(4rem, 12vw, 10rem); line-height: 0.8; z-index: 2; mix-blend-mode: overlay; }
+        .floating-doodle { position: absolute; font-size: 5rem; pointer-events: none; animation: float 6s ease-in-out infinite; }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0); }
+            50% { transform: translateY(-30px) rotate(15deg); }
+        }
+
+        /* --- 8. FOOTER --- */
+        .footer {
+            padding: 120px 5vw; background: var(--ink); color: var(--bg);
+            text-align: center; clip-path: polygon(0 10%, 100% 0, 100% 100%, 0 100%);
+        }
+        .footer h2 { font-family: var(--font-display); font-size: 5vw; margin-bottom: 40px; }
+        .mail-link { font-size: 2rem; color: var(--accent); text-decoration: none; font-weight: 700; border-bottom: 2px solid transparent; transition: 0.3s; }
+        .mail-link:hover { border-bottom-color: var(--accent); }
+
+        /* --- INSANE MODE & LEGIBILITY FIXES --- */
+        .insane-mode { --bg: #C3FF4D; --ink: #000000; --accent: #000000; }
+
+        .insane-mode .mail-link { color: #ffffff; }
+        .insane-mode .mail-link:hover { border-bottom-color: #ffffff; }
+
+        .insane-mode .top-bar {
+            mix-blend-mode: normal; 
+            color: #000000;
+        }
+        
+        @media (max-width: 900px) {
+            .hero { 
+                grid-template-columns: 1fr; 
+                /* CHANGED: Adjusted padding top for mobile, kept min-height */
+                padding-top: 120px; 
+                min-height: 100vh; /* Ensure it stays full screen on mobile */
+            }
+            .hero-visual { justify-content: center; padding-right: 0; order: -1; margin-bottom: 30px; }
+            .cursor-circle { display: none; }
+            .chaos-section { grid-template-columns: 1fr; gap: 60px; }
+            .toolkit-item { flex-direction: column; align-items: flex-start; }
+            .polaroid-pile { height: 400px; }
+            .p1 { transform: rotate(-5deg) translate(-20px, 0); }
+            .p2 { transform: rotate(5deg) translate(20px, 20px); }
+            .p3 { transform: rotate(0deg) translate(0, -40px); }
+
+            /* HAMBURGER RESPONSIVENESS */
+            .hamburger { display: flex; }
+            .nav-links {
+                display: none;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                gap: 60px;
+
+                /* Full Screen Overlay Style */
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100vh;
+                background-color: var(--bg);
+                z-index: 90; /* Below top bar (100), above content */
+
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.4s ease;
+                padding-top: 80px; /* FIX: Clear the fixed header */
+            }
+            .nav-links.active {
+                display: flex;
+                opacity: 1;
+                pointer-events: all;
+            }
+            .nav-link {
+                font-size: 2rem;
+                font-weight: 700;
+            }
+            .nav-link.primary { border-bottom: none; }
+        }
+
+        @media (max-width: 600px) {
+            .top-bar {
+                padding: 20px 5vw 10px 5vw;
+                /* Keep flex row to keep Logo and Hamburger on same line */
+                flex-direction: row; 
+                gap: 15px;
+            }
+            .nav-links { gap: 40px; } 
+
+            /* --- UPDATED: BIGGER FOOTER TITLE --- */
+            .footer h2 {
+                font-size: 12vw; /* Increased from default 5vw */
+                line-height: 1.1;
+                margin-bottom: 30px;
+            }
+            
+            /* Mobile specific tweaks for full screen hero */
+            .hero {
+                gap: 40px;
+            }
+            .hero-title {
+                font-size: 3.5rem;
+            }
+            .bio-lead {
+                font-size: 1.2rem;
+            }
+        }
+        .preloader {
+          position: fixed; 
+          top: 0; left: 0; 
+          width: 100%; height: 100vh;
+          background: var(--ink); 
+          z-index: 99999; /* Higher than everything else */
+    
+    /* Centering the text */
+          display: flex; justify-content: center; align-items: center;
+          color: var(--bg); font-family: var(--font-display); font-size: 2rem;
+    
+    /* 2. The Smooth Motion Settings */
+          transition: transform 0.8s var(--ease-out);
+        }
+
+/* 3. The Ending State (Moved up and out of view) */
+        .preloader.loaded { 
+          transform: translateY(-100%); 
+        }
+    </style>
+</head>
+<body>
+
+    <div class="preloader">
+        <div>ABOUT ME</div>
+    </div>
+
+    <div class="texture-overlay"></div>
+    <div class="cursor-dot"></div>
+    <div class="cursor-circle"></div>
+
+    <nav class="top-bar" id="topBar">
+        <a href="index.html" class="logo interactive">eeshitvaa.design</a>
+        
+        <!-- HAMBURGER ICON (Mobile Only) -->
+        <button class="hamburger interactive" aria-label="Menu" id="hamburgerBtn">
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+        </button>
+
+        <!-- LINKS (Desktop & Mobile Overlay) -->
+        <div class="nav-links" id="navLinks">
+            <a href="work.html" class="nav-link interactive primary">WORK</a>
+            <a href="about.html" class="nav-link interactive">ABOUT</a>
+            <a href="contact.html" class="nav-link interactive">CONTACT</a>
+        </div>
+    </nav>
+
+    <main>
+        <!-- HERO SECTION -->
+        <section class="hero">
+            <div class="hero-visual">
+                <div class="sticker-tag">Available for Snacks!</div>
+                <div class="photo-frame interactive">
+                    <img src="me.jpeg" alt="Eeshitvaa Portrait">
+                </div>
+            </div>
+            <div class="hero-text">
+                <h1 class="hero-title">HI, I'M <span class="name-red">EESHITVAA</span></h1>
+                <p class="bio-lead">I’m a <strong>Design Student</strong> who believes that best digital experiences feel a little bit analog. I blend strict grids with messy doodles, and clean code with human error.</p>
+                <p class="bio-sub">I move rectangles until they look pretty and I cry when Figma crashes. Also, <span class="cat-doodle">I love cats.</span></p>
+                <div class="tags">
+                    <div class="tag interactive">Figma Survivor</div>
+                    <div class="tag interactive">Caffeine Dependent</div>
+                    <div class="tag interactive">Typeface Snob</div>
+                    <div class="tag interactive">Book Hoarder</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SPICE METER -->
+        <section class="spice-section">
+            <h2 class="spice-meter-title">Vibe Check</h2>
+            <div class="slider-ui">
+                <input type="range" min="1" max="100" value="1" id="vibeSlider" class="interactive">
+            </div>
+            <div class="vibe-output" id="vibeTitle">MINIMAL</div>
+            <p class="vibe-subtitle" id="vibeDesc">"I follow all of grids perfectly."</p>
+        </section>
+
+        <!-- TOOLKIT & HOBBIES -->
+        <section class="chaos-section">
+            <div class="toolkit-container">
+                <h2>MY WEAPONRY</h2>
+                <div class="toolkit-list">
+                    <div class="tool-item interactive">
+                        <span class="tool-name">Figma</span>
+                        <span class="tool-humor">Relationship status: Complicated</span>
+                    </div>
+                    <div class="tool-item interactive">
+                        <span class="tool-name">Adobe Suite</span>
+                        <span class="tool-humor">My laptop fan loves this</span>
+                    </div>
+                    <div class="tool-item interactive">
+                        <span class="tool-name">Miro / FigJam</span>
+                        <span class="tool-humor">Sticky note hoarder</span>
+                    </div>
+                    <div class="tool-item interactive">
+                        <span class="tool-name">HTML/CSS</span>
+                        <span class="tool-humor">I Google how to center divs</span>
+                    </div>
+                    <div class="tool-item interactive">
+                        <span class="tool-name">Blender</span>
+                        <span class="tool-humor">I made a donut once</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="quest-container">
+                <div class="quest-header">
+                    <h2>SIDE QUESTS</h2>
+                    <p style="font-family: var(--font-doodle); font-size: 1.8rem; color: var(--accent);">Things I do to avoid pixels</p>
+                </div>
+                
+                <div class="polaroid-pile">
+                    <div class="polaroid p1 interactive">
+                        <img src="book.jpeg" alt="Reading">
+                        <div class="polaroid-caption">Escaping Reality</div>
+                    </div>
+                    
+                    <div class="polaroid p2 interactive">
+                        <img src="soup.jpeg" alt="Soup Time">
+                        <div class="polaroid-caption">Professional Slurper</div>
+                    </div>
+
+                    <div class="polaroid p3 interactive">
+                        <img src="pottery.jpeg" alt="Pottery">
+                        <div class="polaroid-caption">Playing in Mud</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- DEEP END -->
+        <section class="deep-end">
+            <div class="floating-doodle" style="top:10%; left:10%;">🏊‍♂️</div>
+            <div class="floating-doodle" style="top:40%; right:15%; animation-delay: 2s;">☕</div>
+            <div class="floating-doodle" style="bottom:10%; left:30%; animation-delay: 4s;">🐈</div>
+            <h2 class="water-text">OFF-SCREEN <br> HABITAT</h2>
+            <p style="font-family: var(--font-doodle); font-size: 2.5rem; z-index: 5;">Probably overthinking kerning on a street sign.</p>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <h2>Ready to make <br> some chaos?</h2>
+        <a href="mailto:eeshitvaa@design.edu" class="mail-link interactive" class="name-red" style="font-family: var(--font-doodle); font-size: 2.5rem; z-index: 5;">eeshitvaa19@gmail.com</a>
+        <div style="margin-top: 80px; opacity: 0.3; font-size: 0.8rem;">
+            © 2025 EESHITVAA. BUILT WITH COFFEE AND PANIC.
+        </div>
+    </footer>
+
+    <script>
+
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.querySelector('.preloader').classList.add('loaded');
+            }, 500);
+        });
+
+        const dot = document.querySelector('.cursor-dot');
+        const circle = document.querySelector('.cursor-circle');
+        let mx = 0, my = 0, cx = 0, cy = 0;
+
+        document.addEventListener('mousemove', e => {
+            mx = e.clientX; my = e.clientY;
+            dot.style.left = `${mx}px`; dot.style.top = `${my}px`;
+        });
+
+        function animateCursor() {
+            cx += (mx - cx) * 0.15;
+            cy += (my - cy) * 0.15;
+            circle.style.left = `${cx}px`; circle.style.top = `${cy}px`;
+            requestAnimationFrame(animateCursor);
+        }
+        animateCursor();
+
+        document.querySelectorAll('.interactive').forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                circle.style.width = '80px'; circle.style.height = '80px';
+                circle.style.backgroundColor = 'rgba(255,255,255,0.1)';
+            });
+            el.addEventListener('mouseleave', () => {
+                circle.style.width = '40px'; circle.style.height = '40px';
+                circle.style.backgroundColor = 'transparent';
+            });
+        });
+
+        const slider = document.getElementById('vibeSlider');
+        const vTitle = document.getElementById('vibeTitle');
+        const vDesc = document.getElementById('vibeDesc');
+        const body = document.body;
+
+        const vibes = [
+            { title: "MINIMAL", desc: '"I follow all of grids perfectly."', bg: "#F4F2EE", mode: "normal" },
+            { title: "ZESTY", desc: '"I added one drop shadow. Living wild."', bg: "#EAE6DF", mode: "normal" },
+            { title: "SPICY", desc: '"Grids are just a suggestion now."', bg: "#FFDADA", mode: "normal" },
+            { title: "INSANE", desc: '"SYSTEM MALFUNCTION: DESIGN OVERLOAD."', bg: "#C3FF4D", mode: "insane" }
+        ];
+
+        slider.addEventListener('input', e => {
+            const val = e.target.value;
+            let currentVibe;
+            if (val < 25) currentVibe = vibes[0];
+            else if (val < 50) currentVibe = vibes[1];
+            else if (val < 75) currentVibe = vibes[2];
+            else currentVibe = vibes[3];
+            vTitle.innerText = currentVibe.title;
+            vDesc.innerText = currentVibe.desc;
+            body.style.backgroundColor = currentVibe.bg;
+            if (currentVibe.mode === "insane") body.classList.add('insane-mode');
+            else body.classList.remove('insane-mode');
+        });
+
+        document.querySelectorAll('.tag').forEach(tag => {
+            tag.addEventListener('mousemove', e => {
+                const r = tag.getBoundingClientRect();
+                const x = (e.clientX - r.left - r.width/2) * 0.3;
+                const y = (e.clientY - r.top - r.height/2) * 0.3;
+                tag.style.transform = `translate(${x}px, ${y}px)`;
+            });
+            tag.addEventListener('mouseleave', () => { tag.style.transform = `translate(0,0)`; });
+        });
+
+        window.addEventListener('scroll', () => {
+            const scroll = window.pageYOffset;
+            document.querySelectorAll('.floating-doodle').forEach((d, i) => {
+                const speed = (i + 1) * 0.1;
+                d.style.transform = `translateY(${scroll * speed}px)`;
+            });
+        });
+
+        // --- HAMBURGER MENU LOGIC ---
+        const hamburgerBtn = document.getElementById('hamburgerBtn');
+        const navLinks = document.getElementById('navLinks');
+        const topBar = document.getElementById('topBar');
+        const navItems = document.querySelectorAll('.nav-link');
+
+        hamburgerBtn.addEventListener('click', () => {
+            hamburgerBtn.classList.toggle('active');
+            navLinks.classList.toggle('active');
+            
+            // Toggle visual state of top bar to make links readable
+            if(navLinks.classList.contains('active')) {
+                topBar.classList.add('mobile-open');
+            } else {
+                topBar.classList.remove('mobile-open');
+            }
+        });
+
+        // Close menu when a link is clicked
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
+                hamburgerBtn.classList.remove('active');
+                navLinks.classList.remove('active');
+                topBar.classList.remove('mobile-open');
+            });
+        });
+    </script>
+</body>
+</html>

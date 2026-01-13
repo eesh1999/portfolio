@@ -1,0 +1,455 @@
+
+User
+<!DOCTYPE html>
+<html lang="en">
+<head>  
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>VISUAL ARCHIVE | INFINITE GRID</title>
+
+<!-- FONTS -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Italiana&family=Manrope:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --bg: #050505;
+        --text: #e0e0e0;
+        --accent: #ff4d00;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+        background-color: var(--bg);
+        color: var(--text);
+        font-family: 'Manrope', sans-serif;
+        overflow: hidden; 
+        width: 100vw; height: 100vh;
+    }
+    /* --- UI LAYER --- */
+    nav {
+        position: fixed; top: 0; left: 0; width: 100%;
+        padding: 2.5rem 3rem;
+        display: flex; justify-content: space-between; align-items: flex-start;
+        z-index: 100; pointer-events: none; 
+    }
+    .brand {
+        font-family: 'Italiana', serif; font-size: 2rem; line-height: 1;
+        pointer-events: auto; cursor: pointer; mix-blend-mode: exclusion;
+    }
+    .nav-links {
+        display: flex; gap: 2rem; 
+        font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px;
+        pointer-events: auto;
+    }
+
+    .link { cursor: pointer; position: relative; opacity: 0.7; transition: 0.3s; }
+    .link:hover { opacity: 1; }
+
+    /* --- OVERLAYS --- */
+    .grain {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E");
+        pointer-events: none; z-index: 90;
+    }
+
+    .instructions {
+        position: fixed; bottom: 3rem; left: 50%; transform: translateX(-50%);
+        font-size: 0.75rem; text-transform: uppercase; letter-spacing: 2px;
+        opacity: 0.5; pointer-events: none; z-index: 80;
+    }
+
+    /* --- CANVAS --- */
+    #gl {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        z-index: 1; outline: none; cursor: grab;
+    }
+    #gl:active { cursor: grabbing; }
+
+    /* --- MODAL --- */
+    .modal {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        z-index: 200; pointer-events: none;
+        display: flex; opacity: 0;
+        transition: opacity 0.5s;
+    }
+    .modal.active { opacity: 1; pointer-events: auto; }
+
+    .modal-bg {
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.95); backdrop-filter: blur(20px);
+    }
+
+    .modal-content {
+        position: relative; z-index: 2;
+        width: 100%; height: 100%;
+        display: grid; grid-template-columns: 1fr 1fr;
+    }
+
+    .modal-image-container {
+        display: flex; justify-content: center; align-items: center;
+        padding: 4rem;
+    }
+    .modal-img {
+        max-width: 100%; max-height: 85vh;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        transform: scale(0.9); opacity: 0;
+        transition: 0.8s cubic-bezier(0.2, 1, 0.3, 1);
+    }
+    .modal.active .modal-img { transform: scale(1); opacity: 1; }
+
+    .modal-info {
+        display: flex; flex-direction: column; justify-content: center;
+        padding: 4rem; padding-left: 0;
+    }
+    .modal-title {
+        font-family: 'Italiana', serif; font-size: 5rem; line-height: 0.9;
+        margin-bottom: 2rem; transform: translateY(50px); opacity: 0;
+        transition: 0.8s 0.1s cubic-bezier(0.2, 1, 0.3, 1);
+    }
+    .modal-desc {
+        font-size: 1rem; line-height: 1.6; color: #aaa; max-width: 500px;
+        transform: translateY(30px); opacity: 0;
+        transition: 0.8s 0.2s cubic-bezier(0.2, 1, 0.3, 1);
+    }
+    .modal.active .modal-title, .modal.active .modal-desc { transform: translateY(0); opacity: 1; }
+
+    /* --- CLOSE BUTTON --- */
+    .close-btn {
+        position: absolute; top: 3rem; right: 3rem;
+        z-index: 9999; /* Highest priority */
+        background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.3);
+        color: white; padding: 1rem 2rem; border-radius: 50px;
+        text-transform: uppercase; font-size: 0.75rem; letter-spacing: 2px;
+        cursor: pointer; transition: 0.3s;
+    }
+    .close-btn:hover { background: white; color: black; border-color: white; }
+
+    /* --- LOADING --- */
+    .loader {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: #050505; z-index: 9999;
+        display: flex; justify-content: center; align-items: center;
+        flex-direction: column;
+    }
+    .loader-bar { width: 200px; height: 1px; background: #333; margin-top: 1rem; position: relative; }
+    .loader-progress { position: absolute; top: 0; left: 0; height: 100%; width: 0%; background: white; transition: width 0.1s; }
+    .loader-text { font-family: 'Italiana'; font-size: 1.5rem; letter-spacing: 2px; }
+
+    @media (max-width: 768px) {
+        .modal-content { grid-template-columns: 1fr; overflow-y: auto; display: block; }
+        .modal-image-container { padding: 2rem; padding-top: 6rem; height: 50vh; }
+        .modal-info { padding: 2rem; height: auto; }
+        .modal-title { font-size: 3rem; }
+        nav { padding: 1.5rem; }
+        .nav-links { display: none; }
+        .close-btn { top: 1.5rem; right: 1.5rem; padding: 0.8rem 1.5rem; }
+    }
+</style>
+</head>
+<body>
+
+<div class="loader" id="loader">
+    <div class="loader-text">LOADING ARCHIVE</div>
+    <div class="loader-bar"><div class="loader-progress" id="progress"></div></div>
+</div>
+
+<nav>
+    <div class="brand">STUDIO.<br>GRAPHICS</div>
+    <div class="nav-links">
+        <div class="link">Index</div>
+        <div class="link">About</div>
+        <div class="link">Contact</div>
+    </div>
+</nav>
+
+<div class="grain"></div>
+<div class="instructions">Drag to Explore • Click to Expand</div>
+
+<canvas id="gl"></canvas>
+
+<div class="modal" id="modal">
+    <div class="modal-bg" id="modal-bg"></div>
+    <button class="close-btn" id="close-btn">Close View</button>
+    <div class="modal-content">
+        <div class="modal-image-container">
+            <img src="" class="modal-img" id="modal-img">
+        </div>
+        <div class="modal-info">
+            <div style="font-size: 0.8rem; text-transform: uppercase; color: var(--accent); margin-bottom: 1rem;">Graphic Design / 2025</div>
+            <h1 class="modal-title" id="modal-title">Project Title</h1>
+            <p class="modal-desc" id="modal-desc">
+                A comprehensive exploration of typography and form. This project challenges the boundaries of traditional grid systems, utilizing procedural generation to create unique layouts.
+            </p>
+            <div style="margin-top: 2rem; display: flex; gap: 1rem;">
+                <span style="border:1px solid #333; padding: 5px 15px; border-radius: 20px; font-size: 0.7rem; text-transform: uppercase;">Poster</span>
+                <span style="border:1px solid #333; padding: 5px 15px; border-radius: 20px; font-size: 0.7rem; text-transform: uppercase;">Print</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+<script>
+    // CONFIG
+    const config = {
+        imgScale: 2.5,  
+        gap: 0.5,
+        speed: 0.05
+    };
+
+    const data = [
+        { id: 1, title: "Neon Tokyo", img: "https://images.unsplash.com/photo-1572375992501-4b0892d50c69?q=80&w=800" },
+        { id: 2, title: "Abstract Void", img: "https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?q=80&w=800" },
+        { id: 3, title: "Type System", img: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800" },
+        { id: 4, title: "Editorial V1", img: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=800" },
+        { id: 5, title: "Glass Distortion", img: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=800" },
+        { id: 6, title: "Chrome Heart", img: "https://images.unsplash.com/photo-1600607686527-6fb886090705?q=80&w=800" },
+        { id: 7, title: "Liquid Metal", img: "https://images.unsplash.com/photo-1492551557933-34265f7af79e?q=80&w=800" },
+        { id: 8, title: "Brutalist Arc", img: "https://images.unsplash.com/photo-1509281373149-e957c6296406?q=80&w=800" },
+        { id: 9, title: "Vapor Wave", img: "https://images.unsplash.com/photo-1592496001020-d31bd830651f?q=80&w=800" },
+        { id: 10, title: "Dark Matter", img: "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=800" },
+        { id: 11, title: "Kinetic Type", img: "https://images.unsplash.com/photo-1563089145-599997674d42?q=80&w=800" },
+        { id: 12, title: "Minimalism", img: "https://images.unsplash.com/photo-1507608616759-54f48f0af0ee?q=80&w=800" }
+    ];
+
+    // THREE.JS SETUP
+    const canvas = document.querySelector('#gl');
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+    camera.position.z = 15;
+
+    // SHADERS
+    const vertexShader = `
+        uniform float uTime;
+        uniform vec2 uVelocity; 
+        varying vec2 vUv;
+        void main() {
+            vUv = uv;
+            vec3 pos = position;
+            pos.z += sin(uv.x * 3.14) * uVelocity.x * 0.5;
+            pos.z += sin(uv.y * 3.14) * uVelocity.y * 0.5;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+        }
+    `;
+    const fragmentShader = `
+        uniform sampler2D uTexture;
+        uniform vec2 uVelocity;
+        uniform float uHover; 
+        varying vec2 vUv;
+        void main() {
+            vec2 uv = vUv;
+            float shift = length(uVelocity) * 0.02;
+            float r = texture2D(uTexture, uv + vec2(shift, 0.0)).r;
+            float g = texture2D(uTexture, uv).g;
+            float b = texture2D(uTexture, uv - vec2(shift, 0.0)).b;
+            vec3 color = vec3(r, g, b);
+            color += uHover * 0.1;
+            gl_FragColor = vec4(color, 1.0);
+        }
+    `;
+    // GRID GENERATION
+    const textureLoader = new THREE.TextureLoader();
+    const group = new THREE.Group();
+    scene.add(group);
+    const meshes = [];
+    let loaded = 0;
+    const poolSize = 30;
+
+    function loadImages() {
+        for (let i = 0; i < poolSize; i++) {
+            const itemData = data[i % data.length];
+            textureLoader.load(itemData.img, (tex) => {
+                loaded++;
+                document.getElementById('progress').style.width = `${(loaded / poolSize) * 100}%`;
+                
+                const aspect = 0.75; 
+                const geo = new THREE.PlaneGeometry(config.imgScale, config.imgScale / aspect, 24, 24);
+                const mat = new THREE.ShaderMaterial({
+                    vertexShader, fragmentShader,
+                    uniforms: {
+                        uTexture: { value: tex },
+                        uVelocity: { value: new THREE.Vector2(0, 0) },
+                        uTime: { value: 0 },
+                        uHover: { value: 0 }
+                    },
+                });
+
+                const mesh = new THREE.Mesh(geo, mat);
+                mesh.userData = { id: i, data: itemData };
+                group.add(mesh);
+                meshes.push(mesh);
+
+                if (loaded === poolSize) init();
+            });
+        }
+    }
+
+    // POSITION LOGIC
+    let scroll = { x: 0, y: 0 };
+    let targetScroll = { x: 0, y: 0 };
+    let velocity = { x: 0, y: 0 };
+
+    function updateGridPosition() {
+        const width = config.imgScale + config.gap;
+        const height = (config.imgScale / 0.75) + config.gap;
+
+        meshes.forEach((mesh, i) => {
+            const col = i % 5; 
+            const row = Math.floor(i / 5);
+            let x = (col * width) - scroll.x;
+            let y = (row * height) + scroll.y; 
+
+            const wrapW = 5 * width;
+            const wrapH = 6 * height;
+            x = ((x % wrapW) + wrapW) % wrapW;
+            y = ((y % wrapH) + wrapH) % wrapH;
+            x -= wrapW / 2;
+            y -= wrapH / 2;
+
+            mesh.position.set(x, y, 0);
+            mesh.material.uniforms.uVelocity.value.set(velocity.x, velocity.y);
+        });
+    }
+
+    // INPUT
+    const mouse = new THREE.Vector2();
+    const raycaster = new THREE.Raycaster();
+    let hoveredMesh = null;
+    let isDragging = false;
+    let startPos = { x: 0, y: 0 };
+    let isDetailActive = false;
+
+    window.addEventListener('wheel', (e) => {
+        if(isDetailActive) return;
+        targetScroll.x += e.deltaX * 0.01;
+        targetScroll.y -= e.deltaY * 0.01;
+    });
+
+    window.addEventListener('mousedown', (e) => {
+        if(isDetailActive) return;
+        isDragging = true;
+        startPos.x = e.clientX;
+        startPos.y = e.clientY;
+        canvas.style.cursor = 'grabbing';
+    });
+
+    window.addEventListener('mousemove', (e) => {
+        mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+
+        if (isDragging) {
+            const dx = (e.clientX - startPos.x) * 0.05; 
+            const dy = (e.clientY - startPos.y) * 0.05;
+            targetScroll.x -= dx;
+            targetScroll.y += dy;
+            startPos.x = e.clientX;
+            startPos.y = e.clientY;
+        }
+    });
+
+    window.addEventListener('mouseup', () => {
+        isDragging = false;
+        canvas.style.cursor = 'grab';
+    });
+
+    // Global click listener to OPEN modal
+    window.addEventListener('click', (e) => {
+        // IF we are dragging, or modal is open, DO NOT try to select a mesh
+        if (isDragging || isDetailActive) return;
+        
+        if (hoveredMesh) {
+            openDetail(hoveredMesh.userData.data);
+        }
+    });
+
+    // ANIM LOOP
+    function animate() {
+        scroll.x += (targetScroll.x - scroll.x) * config.speed;
+        scroll.y += (targetScroll.y - scroll.y) * config.speed;
+        velocity.x = (targetScroll.x - scroll.x) * 4.0;
+        velocity.y = (targetScroll.y - scroll.y) * 4.0;
+
+        updateGridPosition();
+
+        if(!isDetailActive && !isDragging) {
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(meshes);
+
+            if (intersects.length > 0) {
+                const obj = intersects[0].object;
+                if (hoveredMesh !== obj) {
+                    if (hoveredMesh) gsap.to(hoveredMesh.scale, { x: 1, y: 1, duration: 0.3 });
+                    if (hoveredMesh) gsap.to(hoveredMesh.material.uniforms.uHover, { value: 0, duration: 0.3 });
+                    
+                    hoveredMesh = obj;
+                    gsap.to(hoveredMesh.scale, { x: 1.1, y: 1.1, duration: 0.3 });
+                    gsap.to(hoveredMesh.material.uniforms.uHover, { value: 1, duration: 0.3 });
+                }
+            } else {
+                if (hoveredMesh) {
+                    gsap.to(hoveredMesh.scale, { x: 1, y: 1, duration: 0.3 });
+                    gsap.to(hoveredMesh.material.uniforms.uHover, { value: 0, duration: 0.3 });
+                    hoveredMesh = null;
+                }
+            }
+        }
+        renderer.render(scene, camera);
+        requestAnimationFrame(animate);
+    }
+
+    // FUNCTIONS
+    function init() {
+        gsap.to('#loader', { opacity: 0, duration: 0.5, onComplete: () => {
+            document.getElementById('loader').style.display = 'none';
+        }});
+        animate();
+    }
+
+    function openDetail(data) {
+        isDetailActive = true;
+        document.getElementById('modal-img').src = data.img;
+        document.getElementById('modal-title').innerText = data.title;
+        const modal = document.getElementById('modal');
+        modal.classList.add('active');
+
+        gsap.to(group.position, { z: -5, duration: 1, ease: "power2.out" });
+        gsap.to(group.rotation, { x: 0.1, y: 0.1, duration: 1 });
+        gsap.to(canvas, { filter: 'blur(5px) brightness(0.4)', duration: 0.5 });
+    }
+
+    function closeModal(e) {
+        // CRITICAL FIX: STOP PROPAGATION
+        // This prevents the click from passing through the button
+        // and hitting the window listener which would re-open the modal
+        if(e) e.stopPropagation();
+
+        const modal = document.getElementById('modal');
+        modal.classList.remove('active');
+        isDetailActive = false;
+
+        gsap.to(group.position, { z: 0, duration: 1, ease: "power2.out" });
+        gsap.to(group.rotation, { x: 0, y: 0, duration: 1 });
+        gsap.to(canvas, { filter: 'blur(0px) brightness(1)', duration: 0.5 });
+    }
+
+    // CLOSE LISTENERS
+    document.getElementById('close-btn').addEventListener('click', closeModal);
+    // Also allow closing by clicking the background
+    document.getElementById('modal-bg').addEventListener('click', closeModal);
+
+    window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    loadImages();
+
+</script>
+</body>
+</html>

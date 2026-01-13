@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="format-detection" content="telephone=no, date=no, email=no, address=no">
+    
+    <title>Contact | EESHITVAA</title>
+    
+    <!-- FONTS -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Reenie+Beanie&family=Space+Grotesk:wght@300;500;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+    
+    <!-- ICONS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* --- 1. CONFIGURATION --- */
+        :root {
+            --bg: #F4F2EE;
+            --ink: #111111;
+            --accent: #FF3B30;
+            --btn-color: #FF4500;
+            --paper-grain: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+            --font-display: 'Syne', sans-serif;
+            --font-body: 'Space Grotesk', sans-serif;
+            --font-doodle: 'Reenie Beanie', cursive;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; cursor: none; }
+
+        body {
+            background-color: var(--bg);
+            color: var(--ink);
+            font-family: var(--font-body);
+            overflow-x: hidden;
+            width: 100%;
+        }
+
+        a, a:visited, a:hover, a:active { text-decoration: none; color: var(--ink); }
+
+        .texture-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: var(--paper-grain); pointer-events: none; z-index: 9999;
+        }
+
+        /* --- 2. CUSTOM CURSOR (Desktop Only) --- */
+        .cursor-dot, .cursor-circle { display: none; }
+        @media (hover: hover) and (pointer: fine) {
+            .cursor-dot, .cursor-circle { display: block; }
+            .cursor-dot {
+                position: fixed; top: 0; left: 0; transform: translate(-50%, -50%);
+                border-radius: 50%; pointer-events: none; z-index: 10000;
+                width: 8px; height: 8px; background: var(--ink);
+            }
+            .cursor-circle {
+                position: fixed; top: 0; left: 0; transform: translate(-50%, -50%);
+                border-radius: 50%; pointer-events: none; z-index: 10000;
+                width: 40px; height: 40px; border: 1px solid var(--ink);
+                transition: 0.2s ease-out;
+            }
+            body.hovering .cursor-circle {
+                width: 80px; height: 80px; background-color: rgba(255, 69, 0, 0.1);
+                border-color: var(--btn-color); mix-blend-mode: multiply;
+            }
+        }
+
+        /* --- 3. NAVIGATION --- */
+        .top-bar {
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            padding: 30px 5vw; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            z-index: 100;
+            background: transparent;
+            backdrop-filter: blur(2px);
+            transition: padding 0.3s ease;
+        }
+        
+        .logo { 
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700; 
+            font-size: 1.5rem; 
+            letter-spacing: -0.5px;
+            color: var(--ink);
+            white-space: nowrap;
+            z-index: 101; /* Ensure logo is above mobile menu */
+        }
+
+        /* Desktop Nav Links */
+        .nav-links { 
+            display: flex; 
+            gap: 30px; 
+            z-index: 101;
+        }
+
+        .nav-item { 
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.9rem; 
+            text-transform: uppercase; 
+            font-weight: 500; 
+            letter-spacing: 0.5px;
+            color: var(--ink);
+            position: relative;
+        }
+        .nav-item:hover { color: var(--btn-color); }
+
+        /* --- HAMBURGER MENU (Mobile Only) --- */
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            justify-content: space-between;
+            width: 30px;
+            height: 24px;
+            background: transparent;
+            border: none;
+            z-index: 101;
+            cursor: pointer;
+        }
+
+        .bar {
+            width: 100%;
+            height: 3px;
+            background-color: var(--ink);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        /* Hamburger Animation to X */
+        .hamburger.active .bar:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 6px);
+        }
+        .hamburger.active .bar:nth-child(2) {
+            opacity: 0;
+        }
+        .hamburger.active .bar:nth-child(3) {
+            transform: rotate(-45deg) translate(5px, -6px);
+        }
+
+        /* --- 4. HERO SECTION --- */
+        .joke-container {
+            min-height: 100vh;
+            width: 100%; 
+            position: relative;
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center;
+            align-items: center;
+            overflow: hidden; 
+            padding: 100px 20px 40px; 
+        }
+
+        /* Background Doodle */
+        .bg-doodle-loop {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0; 
+            pointer-events: none;
+            opacity: 0.15; 
+        }
+        .bg-doodle-loop path {
+            fill: none;
+            stroke: var(--ink);
+            stroke-width: 3;
+            stroke-linecap: round;
+            vector-effect: non-scaling-stroke; 
+        }
+
+        .joke-title {
+            font-family: var(--font-display); font-weight: 800;
+            font-size: clamp(2.5rem, 7vw, 5rem); 
+            line-height: 1.1;
+            text-transform: uppercase; text-align: center; 
+            margin-bottom: 40px; 
+            position: relative; z-index: 10;
+            width: 100%;
+        }
+
+        /* BUTTON STYLES */
+        .runaway-btn {
+            padding: 18px 40px; 
+            background: var(--btn-color); 
+            color: #fff;
+            font-family: var(--font-body); font-size: 1rem; font-weight: 700;
+            border-radius: 50px; border: none; z-index: 50; white-space: nowrap;
+            position: absolute; 
+            top: 60%; 
+            left: 50%; 
+            transform: translate(-50%, -50%); 
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            box-shadow: 0 4px 15px rgba(255, 69, 0, 0.3);
+            touch-action: manipulation; /* Improves tap latency */
+        }
+        .runaway-btn:hover { 
+            background: #d63a00; 
+            box-shadow: 0 6px 20px rgba(255, 69, 0, 0.5);
+        }
+        
+        .scroll-link {
+            font-family: var(--font-doodle); font-size: 1.4rem; color: var(--ink);
+            position: absolute; 
+            bottom: 8%; 
+            transform: rotate(-3deg);
+            transition: 0.3s; cursor: pointer; z-index: 60; text-align: center; width: 100%;
+            opacity: 0.6;
+        }
+        .scroll-link:hover { transform: rotate(0deg) scale(1.05); color: var(--btn-color); opacity: 1; }
+        
+        .scroll-arrow {
+            display: block; margin: 5px auto; 
+            stroke: var(--ink); opacity: 0.5;
+        }
+
+        /* --- 5. CONTACT CONTENT (BRAND ALIGNED) --- */
+        .real-contact {
+            width: 100%;
+            min-height: 100vh; 
+            padding: 100px 5vw 60px; 
+            display: grid; 
+            grid-template-columns: 1fr 1.2fr; 
+            gap: 8vw;
+            align-items: start; 
+            background: var(--bg); /* Keep original background */
+            position: relative; 
+            z-index: 2;
+            scroll-margin-top: 100px;
+        }
+
+        .contact-details {
+            width: 100%;
+        }
+
+        .contact-details h2 {
+            font-family: var(--font-display); font-size: clamp(2.5rem, 4vw, 3.5rem);
+            line-height: 1; margin-bottom: 20px; text-transform: uppercase;
+            color: var(--ink);
+            -webkit-text-stroke: 1px var(--ink);
+            transition: 0.3s;
+        }
+        
+        /* HOVER: Fills with BRAND ORANGE */
+        .contact-details h2:hover {
+            color: var(--btn-color);
+            -webkit-text-stroke: 1px var(--btn-color);
+            cursor: default;
+        }
+
+        /* ACCENT: Handwritten note in Brand Orange */
+        .funny-note {
+            font-family: var(--font-doodle); font-size: 1.6rem; 
+            color: var(--btn-color); 
+            transform: rotate(-2deg); margin-bottom: 40px; display: inline-block;
+        }
+
+        .contact-details p { max-width: 400px; line-height: 1.6; margin-bottom: 40px; color: var(--ink); opacity: 0.8; }
+
+        .detail-group { margin-bottom: 30px; position: relative; }
+        .label { font-size: 0.8rem; text-transform: uppercase; font-weight: 700; letter-spacing: 1px; color: var(--ink); opacity: 0.6; margin-bottom: 5px; }
+        .value { font-size: 1.1rem; font-weight: 500; position: relative; display: inline-block; color: var(--ink) !important; word-break: break-all; transition: 0.3s; }
+        .value:hover { color: var(--btn-color) !important; transform: translateX(5px); }
+        
+        /* ACCENT: Arrow in Brand Orange */
+        .arrow-svg { 
+            position: absolute; top: -10px; right: -60px; width: 50px; 
+            transform: rotate(10deg); pointer-events: none;
+            stroke: var(--btn-color);
+            filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.1));
+            animation: bounceArrow 2s infinite ease-in-out;
+        }
+        @keyframes bounceArrow { 0%, 100% {transform: rotate(10deg) translateX(0);} 50% {transform: rotate(15deg) translateX(5px);} }
+
+        .social-row { display: flex; gap: 15px; margin-top: 10px; flex-wrap: wrap; }
+        
+        .social-icon {
+            width: 50px; height: 50px;
+            border: 2px solid var(--ink); border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 1.2rem; transition: 0.3s; color: var(--ink); text-decoration: none; position: relative;
+        }
+        /* HOVER: Fills with Brand Orange */
+        .social-icon:hover { 
+            background: var(--ink); 
+            color: var(--btn-color); 
+            transform: scale(1.1) rotate(5deg); border-radius: 50%; 
+            border-color: var(--ink);
+            box-shadow: 4px 4px 0px var(--btn-color);
+        }
+
+        /* Form Styling */
+        .form-paper {
+            background: #fff; padding: 60px 50px;
+            position: relative; box-shadow: 10px 15px 30px rgba(0,0,0,0.05);
+            transform: rotate(1deg); width: 100%;
+        }
+        .tape {
+            position: absolute; top: -15px; left: 50%; transform: translateX(-50%);
+            width: 120px; height: 35px; background-color: rgba(255, 255, 255, 0.4);
+            border-left: 1px dashed rgba(0,0,0,0.1); border-right: 1px dashed rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1); opacity: 0.6; backdrop-filter: blur(2px);
+        }
+
+        /* ACCENT: Red Ink Stamp */
+        .rubber-stamp {
+            position: absolute; bottom: 20px; right: 20px;
+            color: var(--btn-color);
+            border: 4px solid var(--btn-color);
+            border-radius: 10px;
+            padding: 5px 15px;
+            font-family: var(--font-display); font-weight: 800; font-size: 1.5rem;
+            text-transform: uppercase;
+            transform: rotate(-25deg) scale(1.5);
+            opacity: 0; pointer-events: none;
+            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            mask-image: url("data:image/svg+xml;utf8,<svg width='100' height='100' xmlns='http://www.w3.org/2000/svg'><filter id='noise'><feTurbulence type='fractalNoise' baseFrequency='0.5' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.6'/></svg>");
+        }
+        .form-paper:hover .rubber-stamp {
+            opacity: 0.4; transform: rotate(-20deg) scale(1);
+        }
+
+        .form-group { margin-bottom: 25px; }
+        .form-input, .form-textarea, .form-select {
+            width: 100%; border: none; border-bottom: 2px solid #ccc;
+            padding: 15px 0; font-family: var(--font-body); font-size: 1.1rem;
+            background: transparent; border-radius: 0; transition: 0.3s; color: var(--ink);
+        }
+        .form-input::placeholder, .form-textarea::placeholder { color: #999; }
+        
+        /* FOCUS: Bottom border turns Brand Orange */
+        .form-input:focus, .form-select:focus, .form-textarea:focus { 
+            outline: none; 
+            border-bottom-color: var(--btn-color); 
+            background: rgba(255, 69, 0, 0.02); /* Very subtle tint */
+        }
+        .form-select { cursor: pointer; color: var(--ink); }
+
+        .submit-btn {
+            background: var(--ink); color: #fff; border: none;
+            padding: 20px 0; width: 100%; font-size: 1.1rem; font-weight: 700;
+            font-family: var(--font-display); text-transform: uppercase;
+            margin-top: 10px; transition: 0.3s;
+            position: relative; overflow: hidden; border-radius: 50px;
+        }
+        .submit-btn:hover { background: var(--btn-color); letter-spacing: 2px; }
+
+        .btn-decoration {
+            position: absolute; right: 0px; bottom: -10px; width: 50px; height: 50px;
+            border: 2px solid var(--btn-color); border-radius: 50%;
+            pointer-events: none; opacity: 0; transition: 0.3s;
+        }
+        .submit-btn:hover + .btn-decoration { opacity: 1; transform: scale(1.5); }
+
+        /* =========================================
+           RESPONSIVE MEDIA QUERIES
+           ========================================= */
+        
+        @media (max-width: 900px) {
+            .top-bar { padding: 20px 5vw; }
+            .nav-links { gap: 20px; }
+            .nav-item { font-size: 0.8rem; }
+            
+            .real-contact { 
+                grid-template-columns: 1fr; 
+                gap: 60px; 
+                padding: 80px 5vw 60px;
+            }
+            
+            .form-paper { padding: 40px; transform: rotate(0); }
+            .rubber-stamp { display: none; } /* Hide stamp on tablet */
+            .arrow-svg { display: none; }
+            
+            .contact-details p { max-width: 100%; }
+        }
+
+        @media (max-width: 600px) {
+            .top-bar { padding: 15px 20px; background: rgba(244, 242, 238, 0.95); }
+            .logo { font-size: 1.1rem; }
+
+            .nav-links {
+                display: none; flex-direction: column; justify-content: center; align-items: center;
+                gap: 40px; position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
+                background-color: var(--bg); z-index: 90; opacity: 0; pointer-events: none; transition: opacity 0.4s ease;
+            }
+            .nav-links.active { display: flex; opacity: 1; pointer-events: all; }
+            .nav-item { font-size: 1.5rem; font-weight: 700; letter-spacing: 1px; }
+            .hamburger { display: flex; }
+            
+            .joke-container { padding: 140px 20px 80px; min-height: 100vh; justify-content: flex-start; }
+            .joke-title { margin-bottom: 30px; font-size: clamp(2rem, 8vw, 3rem); line-height: 1.1; }
+            .smaller-text { display: block; font-size: 0.65em; margin-top: 5px; color: var(--btn-color); }
+            
+            /* --- MOBILE RUNAWAY BUTTON STYLES --- */
+            .runaway-btn { 
+                /* Force absolute positioning so it can run anywhere */
+                position: absolute !important;
+                top: 50%; 
+                left: 50%; 
+                transform: translate(-50%, -50%);
+                
+                margin-top: 0 !important; 
+                width: auto !important; /* Fit text */
+                max-width: 80vw; /* Don't overflow screen */
+                z-index: 50;
+            }
+            .runaway-btn:active {
+                /* Feedback on tap */
+                background-color: var(--ink) !important;
+            }
+
+            .scroll-link { position: relative; bottom: auto; margin-top: 60px; font-size: 1.2rem; }
+
+            .real-contact { gap: 40px; padding: 60px 20px; }
+            .form-paper { padding: 30px 20px; }
+            .contact-details h2 { font-size: 2.2rem; margin-bottom: 15px; }
+            .social-row { justify-content: flex-start; }
+            .bg-doodle-loop { opacity: 0.08; } 
+            .form-input, .form-select, .form-textarea { font-size: 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="texture-overlay"></div>
+    <div class="cursor-dot"></div>
+    <div class="cursor-circle"></div>
+
+    <!-- NAVIGATION BAR -->
+    <nav class="top-bar">
+        <a href="index.html" class="logo interactive">eeshitvaa.design</a>
+        
+        <!-- HAMBURGER ICON (Mobile) -->
+        <button class="hamburger interactive" aria-label="Menu">
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+        </button>
+
+        <!-- LINKS (Desktop & Mobile Overlay) -->
+        <div class="nav-links">
+            <a href="work.html" class="nav-item interactive">WORK</a>
+            <a href="about.html" class="nav-item interactive">ABOUT</a>
+            <a href="contact.html" class="nav-item interactive">CONTACT</a>
+        </div>
+    </nav>
+
+    <!-- HERO SECTION -->
+    <section class="joke-container" id="hero-area">
+        
+        <!-- Background Doodle -->
+        <svg class="bg-doodle-loop" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid slice">
+            <path d="M-50,100 C150,50 300,50 400,150 C550,300 150,400 50,500 C-50,600 800,550 900,200 C950,50 1100,0 1150,50" />
+        </svg>
+
+        <h1 class="joke-title">
+            Hire me <br>
+            <span class="smaller-text">Immediately?</span>
+        </h1>
+        
+        <!-- ORANGISH RED BUTTON -->
+        <button id="runawayBtn" class="runaway-btn interactive">YES, DO IT NOW</button>
+
+        <a href="#lets-talk" class="scroll-link interactive">
+            (Just kidding, send me a real email)
+            <br>
+            <svg class="scroll-arrow" width="20" height="20" viewBox="0 0 50 50" fill="none"><path d="M25 0 L25 50 M10 35 L25 50 L40 35" stroke="var(--ink)" stroke-width="2"/></svg>
+        </a>
+    </section>
+
+    <!-- CONTACT SECTION -->
+    <section id="lets-talk" class="real-contact">
+        
+        <div class="contact-details">
+            <h2>YOU FOUND ME.</h2>
+            <span class="funny-note">"I promise I'm nice!"</span>
+            <p>Currently available for freelance projects, design consultations, or just a friendly debate about which font is superior. (It's this one).</p>
+
+            <div class="detail-group">
+                <div class="label">Email Address</div>
+                <div class="value interactive">
+                    <a href="mailto:eeshitvaa19@gmail.com">eeshitvaa19@gmail.com</a>
+                    <svg class="arrow-svg" viewBox="0 0 100 50">
+                        <path d="M10,40 C30,40 30,10 90,10" fill="none" stroke="#FF4500" stroke-width="2" marker-end="url(#arrowhead)"/>
+                        <defs><marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#FF4500"/></marker></defs>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="detail-group">
+                <div class="label">Headquarters</div>
+                <div class="value"> India <span style="font-family: var(--font-doodle); color: var(--btn-color); margin-left:10px;">(GMT +5:30)</span></div>
+            </div>
+
+            
+        </div>
+
+        <div class="form-paper interactive">
+            <div class="tape"></div>
+            <!-- NEW STAMP -->
+            <div class="rubber-stamp">PRIORITY</div>
+            
+            <form action="https://api.web3forms.com/submit" method="POST">
+                <input type="hidden" name="access_key" value="315c41cd-e480-423a-9330-eef8e2ec4d73">
+
+                <div class="form-group"><input type="text" name="name" class="form-input interactive" placeholder="Name (The real one)" required></div>
+                <div class="form-group"><input type="email" name="email" class="form-input interactive" placeholder="Email (No spam, I beg)" required></div>
+                <div class="form-group">
+                    <select name="reason" class="form-select interactive" required>
+                        <option value="" disabled selected>Why have you summoned me?</option>
+                        <option value="project">I have a project (Paid in money)</option>
+                        <option value="exposure">I have a project (Paid in 'Exposure')</option>
+                        <option value="coffee">Virtual Coffee Chat</option>
+                        <option value="lost">I am lost, send help</option>
+                    </select>
+                </div>
+                <div class="form-group"><textarea name="message" rows="4" class="form-textarea interactive" placeholder="Tell me everything..." required></textarea></div>
+                <input type="checkbox" name="botcheck" class="hidden" style="display: none;">
+                <button type="submit" class="submit-btn interactive">Send to Internet Gods</button>
+                <div class="btn-decoration"></div>
+            </form>
+        </div>
+    </section>
+
+    <script>
+        // CURSOR (Desktop Only)
+        const dot = document.querySelector('.cursor-dot');
+        const circle = document.querySelector('.cursor-circle');
+        let mx = 0, my = 0, cx = 0, cy = 0;
+        document.addEventListener('mousemove', e => { 
+            mx = e.clientX; 
+            my = e.clientY; 
+            if(dot) { dot.style.left = `${mx}px`; dot.style.top = `${my}px`; }
+        });
+        function anim() { 
+            cx += (mx - cx) * 0.1; 
+            cy += (my - cy) * 0.1; 
+            if(circle) { circle.style.left = `${cx}px`; circle.style.top = `${cy}px`; } 
+            requestAnimationFrame(anim); 
+        }
+        anim();
+        document.querySelectorAll('.interactive').forEach(el => {
+            el.addEventListener('mouseenter', () => document.body.classList.add('hovering'));
+            el.addEventListener('mouseleave', () => document.body.classList.remove('hovering'));
+        });
+
+        // --- MOBILE HAMBURGER MENU LOGIC ---
+        const hamburger = document.querySelector('.hamburger');
+        const navLinks = document.querySelector('.nav-links');
+        const navItems = document.querySelectorAll('.nav-item');
+
+        hamburger.addEventListener('click', () => {
+            // Toggle the 'active' class
+            hamburger.classList.toggle('active');
+            navLinks.classList.toggle('active');
+        });
+
+        // Close menu when a link is clicked
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
+                hamburger.classList.remove('active');
+                navLinks.classList.remove('active');
+            });
+        });
+
+
+        // RUNAWAY BUTTON LOGIC
+        const btn = document.getElementById('runawayBtn');
+        const container = document.getElementById('hero-area');
+        let isButtonCaught = false; 
+
+        // Helper function to move button randomly
+        function moveButtonRandomly() {
+            if (isButtonCaught) return;
+
+            const containerRect = container.getBoundingClientRect();
+            const btnRect = btn.getBoundingClientRect();
+            
+            // Calculate boundaries to keep button inside container
+            // Leave some padding (30px)
+            const padding = 30;
+            const maxWidth = containerRect.width - btnRect.width - padding;
+            const maxHeight = containerRect.height - btnRect.height - padding;
+
+            // Generate random positions
+            const randomX = Math.random() * (maxWidth - padding) + padding;
+            const randomY = Math.random() * (maxHeight - padding) + padding;
+
+            // Apply positions
+            btn.style.top = `${randomY}px`;
+            btn.style.left = `${randomX}px`;
+            
+            // Reset transform to center on the new coordinates
+            btn.style.transform = "translate(-50%, -50%)";
+            
+            // Add a slight rotation for chaos
+            const randomRotation = (Math.random() - 0.5) * 20; 
+            btn.style.transform += ` rotate(${randomRotation}deg)`;
+        }
+
+        // --- DESKTOP LOGIC ---
+        if (window.matchMedia("(hover: hover)").matches) {
+            
+            btn.addEventListener('mouseover', () => {
+                if (isButtonCaught) return; 
+                moveButtonRandomly();
+                
+                const texts = ["NOPE", "TOO SLOW", "ALMOST", "TRY HARDER", "NICE TRY", "CATCH ME!"];
+                btn.innerText = texts[Math.floor(Math.random() * texts.length)];
+            });
+            
+            // CLICK LOGIC (User actually caught it or clicked it)
+            btn.addEventListener('click', (event) => {
+                event.preventDefault(); 
+                isButtonCaught = true; 
+                btn.innerText = "GOTCHA! Let's Talk!";
+                btn.style.transform = "translate(-50%, -50%) rotate(0deg)"; 
+                btn.style.cursor = "default"; 
+                document.body.classList.remove('hovering'); 
+
+                document.getElementById('lets-talk').scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+
+            // Reset if mouse leaves the hero area
+            container.addEventListener('mouseleave', () => {
+                if (!isButtonCaught) {
+                    btn.style.top = "60%";
+                    btn.style.left = "50%";
+                    btn.style.transform = "translate(-50%, -50%) rotate(0deg)";
+                    btn.innerText = "YES, DO IT NOW";
+                }
+            });
+
+        } else { 
+            // --- MOBILE RUNAWAY LOGIC ---
+            // Mobile uses 'click' because there is no 'mouseover'.
+            // We prevent the default click action so it moves instead of scrolling immediately.
+            
+            btn.addEventListener('click', (event) => {
+                // Prevent the click from registering (so it doesn't scroll)
+                event.preventDefault(); 
+                
+                // Move the button
+                moveButtonRandomly();
+
+                // Vibrate if supported (haptic feedback)
+                if (navigator.vibrate) {
+                    navigator.vibrate(50); 
+                }
+
+                // Change text to taunt user
+                const mobileTexts = ["TOUCH SLOW!", "NOPE", "TRY AGAIN", "MISS!", "TOO FAST!"];
+                btn.innerText = mobileTexts[Math.floor(Math.random() * mobileTexts.length)];
+            });
+        }
+    </script>
+</body>
+</html>

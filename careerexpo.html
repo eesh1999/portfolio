@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sandbox Semester | UX Case Study</title>
+
+<!-- FONTS -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Manrope:wght@400;500;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+
+<style>
+/* --- 1. DESIGN TOKENS --- */
+:root {
+/* Backgrounds */
+--bg-page: #FAFAFA;
+--bg-card: #FFFFFF;
+--bg-dark: #0F0F0F;
+
+/* Typography */
+--ink-primary: #111111;
+--ink-secondary: #555555;
+--ink-tertiary: #888888;
+
+/* Accents */
+--mustard: #FFD60A;
+--mustard-text: #967200;
+--mustard-light: #FFF9DB;
+
+/* Fonts */
+--font-head: 'Manrope', sans-serif;
+--font-body: 'Inter', sans-serif;
+--font-brand: 'Space Grotesk', sans-serif;
+
+/* Spacing */
+--spacing-section: 160px;
+--radius: 16px;
+--spacing-lg: clamp(80px, 10vw, 160px);
+--spacing-md: clamp(40px, 5vw, 80px);
+--container-pad: clamp(20px, 5vw, 50px);
+}
+
+/* RESET */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+background-color: var(--bg-page);
+color: var(--ink-primary);
+font-family: var(--font-body);
+line-height: 1.75;
+font-size: 18px;
+overflow-x: hidden;
+-webkit-font-smoothing: antialiased;
+cursor: auto;
+}
+
+/* --- 2. CUSTOM CURSOR (DESKTOP ONLY) --- */
+.cursor-dot, .cursor-outline { display: none; }
+
+@media (hover: hover) and (pointer: fine) {
+* { cursor: none !important; }
+
+.cursor-dot {
+display: block;
+position: fixed; top: 0; left: 0;
+width: 6px; height: 6px;
+background: var(--ink-primary);
+border-radius: 50%;
+pointer-events: none; z-index: 10001;
+transform: translate(-50%, -50%);
+}
+.cursor-outline {
+display: block;
+position: fixed; top: 0; left: 0;
+width: 40px; height: 40px;
+border: 1px solid rgba(17, 17, 17, 0.3);
+border-radius: 50%;
+pointer-events: none; z-index: 10000;
+transform: translate(-50%, -50%);
+transition: width 0.2s, height 0.2s, background-color 0.2s, border-color 0.2s;
+}
+
+body.hovering .cursor-outline {
+width: 60px; height: 60px;
+background-color: rgba(255, 214, 10, 0.15);
+border-color: var(--mustard);
+}
+body.hovering .cursor-dot {
+background: var(--mustard);
+}
+}
+
+/* --- 3. RESPONSIVE TYPOGRAPHY --- */
+h1, h2, h3, h4 {
+font-family: var(--font-head);
+color: var(--ink-primary);
+font-weight: 800;
+letter-spacing: -0.02em;
+line-height: 1.2;
+}
+
+.headline-lg { font-size: clamp(2.5rem, 6vw, 4.5rem); margin-bottom: 24px; }
+.headline-md { font-size: clamp(1.8rem, 4vw, 2.5rem); margin-bottom: 20px; }
+.body-lead { font-size: clamp(1.1rem, 2vw, 1.4rem); color: #333; line-height: 1.6; font-weight: 400; margin-bottom: 40px; max-width: 800px; }
+p { margin-bottom: 24px; color: var(--ink-secondary); }
+
+.chapter-label {
+font-family: var(--font-brand);
+font-size: 13px; font-weight: 700;
+color: var(--mustard-text);
+text-transform: uppercase; letter-spacing: 2px;
+margin-bottom: 24px; display: block;
+border-left: 3px solid var(--mustard); padding-left: 12px;
+}
+
+/* --- 4. LAYOUT UTILITIES --- */
+.container { max-width: 1200px; margin: 0 auto; padding: 0 var(--container-pad); }
+.reading-width { max-width: 780px; margin: 0 auto; padding: 0 var(--container-pad); }
+.spacer { height: var(--spacing-lg); }
+.spacer-sm { height: var(--spacing-md); }
+
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(40px, 5vw, 80px); align-items: center; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; }
+
+/* --- 5. NAVIGATION --- */
+.case-nav {
+position: fixed; top: 0; left: 0; width: 100%;
+background: rgba(255,255,255,0.95); backdrop-filter: blur(12px);
+border-bottom: 1px solid rgba(0,0,0,0.05); z-index: 1000;
+padding: 16px 0; transition: transform 0.3s;
+}
+.nav-inner { display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto; padding: 0 var(--container-pad); }
+
+.nav-back {
+text-decoration: none; color: var(--ink-primary); font-weight: 700;
+font-family: var(--font-brand); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px;
+display: flex; align-items: center; gap: 8px; transition: color 0.2s;
+}
+.nav-back:hover { color: var(--mustard-text); }
+.nav-back span { font-size: 1.2rem; margin-top: -2px; }
+
+.nav-menu { display: flex; gap: 32px; }
+.nav-item {
+text-decoration: none; color: #555; font-size: 12px;
+font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+transition: color 0.2s;
+}
+.nav-item:hover { color: var(--mustard-text); }
+
+/* --- 6. COMPONENTS --- */
+.stats-bar {
+display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;
+border-top: 1px solid #E5E5E5; border-bottom: 1px solid #E5E5E5;
+padding: 40px 0; margin-top: 60px;
+}
+.stat-label { font-size: 11px; text-transform: uppercase; color: #888; letter-spacing: 1px; margin-bottom: 8px; }
+.stat-value { font-size: clamp(14px, 2vw, 16px); font-weight: 600; color: #000; }
+
+.insight-card {
+background: var(--bg-card); padding: clamp(24px, 4vw, 40px);
+border: 1px solid #eee; border-radius: var(--radius);
+transition: transform 0.3s; box-shadow: 0 10px 30px rgba(0,0,0,0.02); height: 100%;
+}
+.insight-card:hover { transform: translateY(-5px); border-color: var(--mustard); }
+.insight-num { font-family: var(--font-brand); font-size: 3rem; color: rgba(0,0,0,0.05); font-weight: 700; line-height: 1; margin-bottom: 10px; }
+
+.evolution-block {
+background: #F4F4F4; border-radius: var(--radius);
+padding: 30px; margin-bottom: 30px;
+display: flex; align-items: center; justify-content: space-between; gap: 20px;
+}
+.evo-state { flex: 1; background: #fff; padding: 20px; border-radius: 8px; text-align: center; border: 1px dashed #ccc; }
+.evo-arrow { color: var(--mustard); font-size: 1.5rem; font-weight: bold; }
+.evo-label { font-size: 11px; text-transform: uppercase; color: #888; display: block; margin-bottom: 8px; }
+
+.ds-container { margin: 60px 0; padding: clamp(20px, 4vw, 40px); border: 1px solid #eee; border-radius: var(--radius); }
+.swatch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 20px; margin-bottom: 40px; }
+.swatch { height: 100px; border-radius: 8px; margin-bottom: 10px; border: 1px solid rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; }
+.typo-sample { font-family: var(--font-brand); font-size: clamp(1.5rem, 3vw, 2rem); line-height: 1.2; margin-bottom: 10px; }
+
+.notif-stack { display: flex; flex-direction: column; gap: 16px; width: 100%; }
+.notif-card {
+background: #fff; padding: 20px; border-radius: 12px;
+box-shadow: 0 4px 20px rgba(0,0,0,0.06); border-left: 4px solid var(--mustard);
+display: flex; gap: 15px; align-items: start;
+}
+.notif-icon { width: 32px; height: 32px; background: var(--mustard-light); color: var(--mustard-text); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+
+.hero-img { width: 100%; height: auto; aspect-ratio: 16/9; background: #eee; border-radius: var(--radius); object-fit: cover; margin-top: 40px; }
+.phone-frame {
+width: 100%; max-width: 320px; aspect-ratio: 9/19; background: #050505;
+border: 8px solid #1a1a1a; border-radius: 40px; margin: 0 auto;
+box-shadow: 0 30px 60px rgba(0,0,0,0.2); overflow: hidden; position: relative;
+}
+.phone-frame img { width: 100%; height: 100%; object-fit: cover; }
+
+.box-render {
+width: 100%; aspect-ratio: 16/9; background: transparent;
+border-radius: var(--radius); display: flex; align-items: center; justify-content: center;
+box-shadow: 0 20px 40px rgba(0,0,0,0.05); position: relative; overflow: hidden;
+}
+.box-render img { width: 100%; height: 100%; object-fit: cover; border-radius: var(--radius); }
+
+.sketch-container {
+width: 100%; margin: 40px 0; padding: 40px;
+background-color: #F4F4F4; border-radius: var(--radius);
+text-align: center; border: 2px dashed #CCC;
+}
+.sketch-img { max-width: 100%; height: auto; mix-blend-mode: multiply; filter: grayscale(1); }
+
+@media (max-width: 900px) {
+.grid-2, .grid-3 { grid-template-columns: 1fr; gap: 40px; }
+.stats-bar { grid-template-columns: 1fr 1fr; gap: 30px; }
+.evolution-block { flex-direction: column; text-align: center; }
+.evo-arrow { transform: rotate(90deg); }
+.nav-menu { display: none; }
+.grid-2 > div:nth-child(2) { order: -1; }
+.phone-frame { max-width: 280px; }
+}
+/* Parent Notification Styles */
+.notif-stack { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 16px; 
+    width: 100%; 
+}
+
+.notif-card {
+    background: #fff; 
+    padding: 20px; 
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06); 
+    border-left: 4px solid var(--mustard);
+    display: flex; 
+    gap: 15px; 
+    align-items: start; 
+    transition: transform 0.2s;
+}
+
+.notif-card:hover { 
+    transform: scale(1.02); 
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+.notif-icon { 
+    width: 32px; 
+    height: 32px; 
+    background: var(--mustard-light); 
+    color: var(--mustard-text); 
+    border-radius: 50%; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    font-size: 14px; 
+    flex-shrink: 0; 
+}
+/* --- DESIGN SYSTEM STYLES --- */
+
+/* Palette Grid */
+.palette-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.palette-card {
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 12px;
+    padding: 15px;
+    transition: transform 0.3s;
+}
+.palette-card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+
+.palette-swatch {
+    width: 100%;
+    height: 80px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.05);
+}
+
+.palette-info h5 { margin: 0; font-size: 1rem; font-weight: 700; }
+.palette-info code { display: block; font-family: monospace; color: #888; font-size: 0.85rem; margin-bottom: 10px; }
+.palette-info p { margin: 0; font-size: 0.85rem; color: #333; line-height: 1.4; }
+.palette-desc { color: #666 !important; margin-top: 5px !important; font-size: 0.8rem !important; }
+
+/* Typography Table */
+.type-container {
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 16px;
+    padding: 40px;
+}
+
+.type-row {
+    display: grid;
+    grid-template-columns: 100px 1fr 150px;
+    align-items: start;
+    gap: 40px;
+}
+
+.type-label {
+    font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;
+    color: #888; font-weight: 700; margin-top: 10px;
+}
+
+.type-badge {
+    font-size: 0.75rem; background: #f0f0f0; padding: 4px 8px;
+    border-radius: 4px; color: #333; font-family: monospace;
+}
+
+.type-preview {
+    font-size: 3rem; color: #000; opacity: 0.1;
+    text-align: right; line-height: 1;
+}
+
+/* Mobile Responsiveness for Design System */
+@media (max-width: 768px) {
+    .type-row { grid-template-columns: 1fr; gap: 20px; }
+    .type-preview { display: none; } /* Hide big Aa on mobile */
+    .type-label { margin-top: 0; color: var(--mustard-text); }
+}
+</style>
+</head>
+<body>
+
+<div class="cursor-dot"></div>
+<div class="cursor-outline"></div>
+
+<nav class="case-nav">
+<div class="nav-inner">
+<a href="i6.html" class="nav-back">
+<span>←</span> Back to Portfolio
+</a>
+<div class="nav-menu">
+<a href="#context" class="nav-item">Context</a>
+<a href="#research" class="nav-item">Research</a>
+<a href="#solution" class="nav-item">Ecosystem</a>
+<a href="#parent" class="nav-item">Viability</a>
+<a href="#impact" class="nav-item">Impact</a>
+</div>
+</div>
+</nav>
+
+<!-- HERO SECTION -->
+<header class="container hero" style="padding-top: 140px; padding-bottom: 80px;">
+<span class="chapter-label">Case Study • 2025</span>
+<h1 class="headline-lg">Career<span style="color:var(--mustard);">Expo</span></h1>
+<p class="body-lead">
+A "Phygital" career simulator that bridges the gap between digital discovery and physical internships, replacing the "Summer of Confusion" with a data-driven quest.
+</p>
+
+<img src="careerexpo1.jpg" alt="Sandbox Semester Hero Image" class="hero-img interactive">
+
+<div class="stats-bar">
+<div><div class="stat-label">Role</div><div class="stat-value">Product Designer</div></div>
+<div><div class="stat-label">Timeline</div><div class="stat-value">4 Weeks Sprint</div></div>
+<div><div class="stat-label">Core Feature</div><div class="stat-value">Phygital Loot Crates</div></div>
+<!-- Updated Stat -->
+<div><div class="stat-label">Tech</div><div class="stat-value">Voice & Behavioral AI ,Figma</div></div>
+</div>
+</header>
+
+<!-- 01. CONTEXT -->
+<section id="context" class="reading-width">
+<div class="spacer"></div>
+<span class="chapter-label">01 / The Context</span>
+<h2 class="headline-md">The 10th Grade Bottleneck.</h2>
+<p>In India, the transition from 10th to 11th grade is critical. Students must choose a "Stream" (Science, Commerce, Arts) that dictates their entire future. Currently, this decision is based on <b>fear</b> and <b>rote memorization</b> marks, not actual aptitude.</p>
+<p>Students are paralyzed by choice ("Netflix Paralysis"), while parents block non-traditional careers because they lack "safe" financial data. The result? A generation of students who have book knowledge but zero real-world context.</p>
+
+<div style="background: var(--mustard-light); padding: 30px; border-radius: 12px; margin: 40px 0; border-left: 4px solid var(--mustard);">
+<h4 style="font-size: 1.1rem; margin-bottom: 10px; color: var(--mustard-text);">The HMW Statement</h4>
+<p style="margin-bottom: 0; font-weight: 500; color: #5d4a05;">
+How might we help students visualize and <span style="text-decoration:underline;">physically test-drive</span> future career paths based on their skills, making it easier (and safer) for them to decide?
+</p>
+</div>
+</section>
+
+<!-- 02. RESEARCH -->
+<section id="research" class="container">
+<div class="spacer"></div>
+<div class="reading-width">
+<span class="chapter-label">02 / Research & Process</span>
+<h2 class="headline-md">Digging Deeper: The 5 Whys.</h2>
+<p>I didn't just want to know <i>what</i> they wanted, but <i>why</i> they were scared. I conducted 10 student interviews and 5 parent interviews using the "5 Whys" framework.</p>
+</div>
+
+<div class="grid-3" style="margin-top: 50px;">
+<div class="insight-card interactive">
+<div class="insight-num">01</div>
+<h4>The Trust Gap</h4>
+<p style="font-size: 0.95rem; margin-top: 15px;">Parents don't hate Design; they hate <b>Risk</b>. They said, <i>"I don't know if this job pays well."</i> They needed data, not passion.</p>
+</div>
+<div class="insight-card interactive">
+<div class="insight-num">02</div>
+<h4>The Autonomy Issue</h4>
+<p style="font-size: 0.95rem; margin-top: 15px;">Students feel suffocated by "Career Counseling" that feels like school. If it's mandatory, they reject it.</p>
+</div>
+<div class="insight-card interactive">
+<div class="insight-num">03</div>
+<h4>Tangibility</h4>
+<p style="font-size: 0.95rem; margin-top: 15px;"><i>"Watching a video isn't the same as doing it."</i> Students feel like imposters in workplaces. They need a "Uniform" to feel professional.</p>
+</div>
+</div>
+
+<div class="spacer-sm"></div>
+<div class="reading-width">
+<h4 style="font-size: 1.1rem; color: var(--ink-secondary);">From Chaos to Clarity</h4>
+<p>We didn't start with an app. We started with a wall of sticky notes. Using the <b>"How Might We"</b> framework, we mapped out every possible way to simulate a career.</p>
+
+<div class="sketch-container interactive" style="padding: 20px;">
+<img src="brainstorming.jpeg" alt="Brainstorming wall with sticky notes" class="sketch-img" style="border-radius: 8px; mix-blend-mode: normal; filter: none; width: 100%;">
+<p style="font-size: 0.8rem; color: #888; margin-top: 15px; margin-bottom: 0;">
+<b>The Ideation Wall:</b> Moving from abstract problems to tangible solutions.
+</p>
+</div>
+</div>
+</section>
+
+<!-- MARKET GAP SECTION -->
+<section class="container">
+<div class="spacer-sm"></div>
+<div class="reading-width">
+<h4 style="font-size: 1.1rem; color: var(--ink-secondary); margin-bottom: 20px;">The Market Gap</h4>
+<p>I analyzed the landscape not by "Features," but by "Mental Models." The current market treats career discovery as <b>Homework</b>. I wanted to treat it as <b>Entertainment</b>.</p>
+</div>
+
+<div class="grid-3" style="margin-top: 40px;">
+<div style="background: #F4F4F4; padding: 30px; border-radius: 16px; border: 1px solid #eee;" class="interactive">
+<div style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: #888; margin-bottom: 10px;">The Status Quo</div>
+<h3 style="font-size: 1.4rem; margin-bottom: 15px;">LinkedIn / Indeed</h3>
+<p style="font-size: 0.9rem; margin-top: 15px; color: #555;">Great for getting a job. Terrible for <i>discovering</i> who you want to be.</p>
+</div>
+<div style="background: #F4F4F4; padding: 30px; border-radius: 16px; border: 1px solid #eee;" class="interactive">
+<div style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: #888; margin-bottom: 10px;">The Competition</div>
+<h3 style="font-size: 1.4rem; margin-bottom: 15px;">Instagram / Reels</h3>
+<p style="font-size: 0.9rem; margin-top: 15px; color: #555;">High engagement, but zero depth. It sells a fantasy, not a career path.</p>
+</div>
+<div style="background: #111; color: #fff; padding: 30px; border-radius: 16px; position: relative; overflow: hidden;" class="interactive">
+<div style="position: absolute; top: -20px; right: -20px; width: 100px; height: 100px; background: var(--mustard); filter: blur(40px); opacity: 0.4;"></div>
+<div style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: var(--mustard); margin-bottom: 10px;">The Solution</div>
+<h3 style="font-size: 1.4rem; margin-bottom: 15px; color: #fff;">Sandbox Semester</h3>
+<div style="display: flex; gap: 10px; flex-wrap: wrap;">
+<span style="background: rgba(255,255,255,0.1); padding: 5px 10px; border-radius: 4px; font-size: 0.75rem;">Gamified</span>
+<span style="background: rgba(255,255,255,0.1); padding: 5px 10px; border-radius: 4px; font-size: 0.75rem;">Phygital</span>
+</div>
+<p style="font-size: 0.9rem; margin-top: 15px; color: #ccc;">Combining the <b>Discovery</b> of Netflix with the <b>Delivery</b> of Amazon.</p>
+</div>
+</div>
+</section>
+
+<!-- 03. FEEDBACK LOOP (UPDATED) -->
+<section id="feedback" class="reading-width">
+<div class="spacer"></div>
+<span class="chapter-label">03 / The Feedback Loop</span>
+<h2 class="headline-md">I was wrong. Here is how I pivoted.</h2>
+<p>My first prototype was disjointed. I showed users a "Sandbox" idea and a separate "Job Dictionary." Their feedback forced me to combine everything into one ecosystem.</p>
+
+<div class="evolution-block interactive">
+<div class="evo-state">
+<span class="evo-label">Idea 1 + Idea 2</span>
+<strong>Sandbox + Dictionary (Separate)</strong>
+</div>
+<div class="evo-arrow">→</div>
+<div class="evo-state">
+<span class="evo-label">Synthesis</span>
+<strong>Integrated Discovery Layer</strong>
+</div>
+</div>
+<p style="font-size: 0.9rem; color: #666; margin-top: -20px; margin-bottom: 40px;"><i>"I liked the Dictionary info but the Sandbox fun."</i> — I combined them: The Dictionary became the "Data Layer" inside the Gamified Sandbox app.</p>
+
+<div class="evolution-block interactive">
+<div class="evo-state">
+<span class="evo-label">Card Sorting Insight</span>
+<strong>Blue/White Collar Only</strong>
+</div>
+<div class="evo-arrow">→</div>
+<div class="evo-state">
+<span class="evo-label">The Missing Piece</span>
+<strong>Added "Creative Collar"</strong>
+</div>
+</div>
+<p style="font-size: 0.9rem; color: #666; margin-top: -20px; margin-bottom: 40px;"><i>"Where are the artists? Where are the chefs?"</i> — During card sorting, users demanded non-traditional paths. I added a specific "Creative Collar" stream.</p>
+
+<div class="evolution-block interactive">
+<div class="evo-state">
+<span class="evo-label">Assumption</span>
+<strong>Mandatory Curriculum</strong>
+</div>
+<div class="evo-arrow">→</div>
+<div class="evo-state">
+<span class="evo-label">User Pivot</span>
+<strong>Voluntary "Season Pass"</strong>
+</div>
+</div>
+<p style="font-size: 0.9rem; color: #666; margin-top: -20px; margin-bottom: 40px;"><i>"If it's an obligation, I won't do it."</i> — This was critical. I shifted the model from "Schoolwork" to a "Voluntary Subscription" to ensure genuine engagement.</p>
+
+<div class="evolution-block interactive">
+<div class="evo-state">
+<span class="evo-label">Friction Point</span>
+<strong>Forced Generalist Path</strong>
+</div>
+<div class="evo-arrow">→</div>
+<div class="evo-state">
+<span class="evo-label">Solution</span>
+<strong>Full Autonomy (The Filter)</strong>
+</div>
+</div>
+<p style="font-size: 0.9rem; color: #666; margin-top: -20px;"><i>"I know I don't want to be a doctor."</i> — Users wanted to filter out jobs they hated. I gave them total autonomy to choose <i>whatever</i> and <i>whichever</i> profession they wanted to test.</p>
+</section>
+
+<!-- 04. DESIGN SYSTEM (UPGRADED) -->
+<section id="system" class="container">
+    <div class="spacer"></div>
+    <span class="chapter-label">04 / Design System</span>
+    <h2 class="headline-md">Visual Language: "Construction Chic."</h2>
+    
+    <div class="reading-width" style="margin: 0; padding: 0;">
+        <p>
+            To differentiate CareerExpo from boring educational tools (like LinkedIn or Coursera), I rejected the standard "Corporate Blue" palette. 
+        </p>
+        <p>
+            I developed a visual identity that sits at the intersection of <b>Gaming UI</b> (Valorant/Discord) and <b>Industrial Construction</b>. The metaphor? The student is <i>building</i> their future, so the tools should feel heavy, industrial, and cool.
+        </p>
+    </div>
+
+    <!-- COLOR PALETTE SECTION -->
+    <div style="margin-top: 60px;">
+        <h4 style="font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; color: #888; margin-bottom: 20px;">01. The Palette</h4>
+        
+        <div class="palette-grid">
+            <!-- Color 1 -->
+            <div class="palette-card">
+                <div class="palette-swatch" style="background: #050505;"></div>
+                <div class="palette-info">
+                    <h5>Midnight</h5>
+                    <code>#050505</code>
+                    <p><b>Use:</b> Backgrounds</p>
+                    <p class="palette-desc">Reduces eye strain. Signals "Gaming Mode" rather than "Study Mode."</p>
+                </div>
+            </div>
+            <!-- Color 2 -->
+            <div class="palette-card">
+                <div class="palette-swatch" style="background: #FFD60A;"></div>
+                <div class="palette-info">
+                    <h5>Safety Yellow</h5>
+                    <code>#FFD60A</code>
+                    <p><b>Use:</b> Call to Actions</p>
+                    <p class="palette-desc">High visibility. Borrowed from construction zones/hazard tape.</p>
+                </div>
+            </div>
+            <!-- Color 3 -->
+            <div class="palette-card">
+                <div class="palette-swatch" style="background: #1A1A1A;"></div>
+                <div class="palette-info">
+                    <h5>Concrete</h5>
+                    <code>#1A1A1A</code>
+                    <p><b>Use:</b> Surface Cards</p>
+                    <p class="palette-desc">Softens the contrast against the black background.</p>
+                </div>
+            </div>
+            <!-- Color 4 -->
+            <div class="palette-card">
+                <div class="palette-swatch" style="background: #FFFFFF; border: 1px solid #eee;"></div>
+                <div class="palette-info">
+                    <h5>Pure White</h5>
+                    <code>#FFFFFF</code>
+                    <p><b>Use:</b> Primary Text</p>
+                    <p class="palette-desc">Maximum legibility for reading career data.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TYPOGRAPHY SECTION -->
+    <div style="margin-top: 80px;">
+        <h4 style="font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; color: #888; margin-bottom: 20px;">02. Typography</h4>
+        
+        <div class="type-container">
+            <!-- HEADINGS -->
+            <div class="type-row">
+                <div class="type-label">Headings</div>
+                <div class="type-example">
+                    <span style="font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 2.5rem; line-height: 1.1;">Space Grotesk</span>
+                    <div style="margin-top: 15px; display: flex; gap: 10px;">
+                        <span class="type-badge">Bold (700)</span>
+                        <span class="type-badge">Medium (500)</span>
+                    </div>
+                    <p style="font-size: 0.9rem; color: #666; margin-top: 15px;">
+                        A brutalist, geometric sans-serif. Its quirky "ink traps" give it a technical, engineered feel suitable for Gen Z.
+                    </p>
+                </div>
+                <div class="type-preview" style="font-family: 'Space Grotesk', sans-serif; font-weight: 700;">Aa Bb Cc</div>
+            </div>
+
+            <div style="width: 100%; height: 1px; background: #eee; margin: 30px 0;"></div>
+
+            <!-- BODY -->
+            <div class="type-row">
+                <div class="type-label">Body & UI</div>
+                <div class="type-example">
+                    <span style="font-family: 'Inter', sans-serif; font-weight: 400; font-size: 2.5rem; line-height: 1.1;">Inter</span>
+                    <div style="margin-top: 15px; display: flex; gap: 10px;">
+                        <span class="type-badge">Regular (400)</span>
+                        <span class="type-badge">Semi-Bold (600)</span>
+                    </div>
+                    <p style="font-size: 0.9rem; color: #666; margin-top: 15px;">
+                        The industry standard for readability. It disappears so the data (Salary, Growth, Skills) stands out.
+                    </p>
+                </div>
+                <div class="type-preview" style="font-family: 'Inter', sans-serif; font-weight: 400;">Aa Bb Cc</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ACCESSIBILITY BADGE -->
+    <div style="margin-top: 40px; display: inline-flex; align-items: center; gap: 10px; background: #eefdf0; padding: 10px 20px; border-radius: 50px; border: 1px solid #bbf7c6;">
+        <span style="color: #168a2d; font-size: 1.2rem;">✔</span>
+        <span style="color: #0f511c; font-size: 0.85rem; font-weight: 600;">Passed WCAG AA Standards for Color Contrast</span>
+    </div>
+
+</section>
+
+<!-- BLUEPRINT / USER FLOW -->
+<section id="solution" class="container">
+<div class="spacer-sm"></div>
+<div style="background: #F4F4F4; padding: clamp(20px, 4vw, 60px); border-radius: var(--radius); text-align: center; border: 1px dashed #CCC;">
+<span class="chapter-label" style="border:none; padding:0; display:block; margin-bottom:15px;">The Blueprint</span>
+<h3 class="headline-md">From App to Real World.</h3>
+<p style="max-width: 600px; margin: 0 auto 40px auto; color: #666;">
+Mapping the user journey ensuring the transition from digital booking to physical work is seamless.
+</p>
+
+<div style="display: flex; flex-direction: column; gap: 20px; text-align: left; margin-top: 40px;">
+
+<!-- PHASE 1 -->
+<div style="display: flex; gap: 20px; align-items: start;">
+<div style="background: var(--mustard); color: #fff; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;">1</div>
+<div>
+<h4 style="margin-bottom: 5px; font-size: 1.1rem;">Netflix-Style Discovery</h4>
+<p style="font-size: 0.9rem; margin-bottom: 0;">Students browse POV trailers of careers. They drag-and-drop jobs into their "Summer Calendar."</p>
+</div>
+</div>
+
+<div style="width: 2px; height: 30px; background: #ddd; margin-left: 20px;"></div>
+
+<!-- PHASE 2 -->
+<div style="display: flex; gap: 20px; align-items: start;">
+<div style="background: var(--ink-primary); color: #fff; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;">2</div>
+<div>
+<h4 style="margin-bottom: 5px; font-size: 1.1rem;">The Gear Drop (Phygital)</h4>
+<p style="font-size: 0.9rem; margin-bottom: 0;">Booking triggers a physical "Loot Crate" delivery. It contains the Uniform and a QR Lanyard for workplace access.</p>
+</div>
+</div>
+
+<div style="width: 2px; height: 30px; background: #ddd; margin-left: 20px;"></div>
+
+<!-- PHASE 3 -->
+<div style="display: flex; gap: 20px; align-items: start;">
+<div style="background: var(--ink-primary); color: #fff; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;">3</div>
+<div>
+<h4 style="margin-bottom: 5px; font-size: 1.1rem;">Triangulated Analysis</h4>
+<p style="font-size: 0.9rem; margin-bottom: 0;">We measure <b>Tone of Voice (NLP)</b> + <b>Task Completion Speed</b> + <b>Self-Reported Mood</b> to gauge true aptitude. (Privacy-First approach).</p>
+</div>
+</div>
+
+<div style="width: 2px; height: 30px; background: #ddd; margin-left: 20px;"></div>
+
+<!-- PHASE 4 -->
+<div style="display: flex; gap: 20px; align-items: start;">
+<div style="background: #fff; border: 2px solid var(--mustard); color: var(--mustard-text); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;">4</div>
+<div>
+<h4 style="margin-bottom: 5px; font-size: 1.1rem;">The Skill Radar Graph</h4>
+<p style="font-size: 0.9rem; margin-bottom: 0;">Data is converted into a visual graph showing the student's natural aptitude, helping parents trust the career choice.</p>
+</div>
+</div>
+
+</div>
+</section>
+
+<!-- 05. SOLUTION WALKTHROUGH -->
+<section id="ui" class="container">
+<div class="spacer"></div>
+<div style="text-align: center; max-width: 700px; margin: 0 auto 80px auto;">
+<span class="chapter-label" style="display:inline-block;">05 / The Solution</span>
+<h2 class="headline-md">The Ecosystem.</h2>
+<p>A seamless loop between the App (Discovery) and the World (Experience).</p>
+</div>
+
+<!-- Step 1: Marketplace -->
+<div class="grid-2">
+<div>
+<span class="chapter-label" style="border:none; padding:0; color:#888;">Step 01</span>
+<h3 class="headline-md" style="font-size: 2rem;">The "Marketplace"</h3>
+<p>No boring text. The "Profession Dictionary" lives inside these dynamic cards. Students browse careers via high-energy POV video trailers.</p>
+<div style="margin-top: 20px; font-size: 0.9rem; color: var(--mustard-text);">➔ Interaction: Drag & Drop Calendar Planning</div>
+</div>
+<div class="phone-frame interactive">
+<img src="careers.jpeg" alt="Marketplace Screen showing Culinary Arts">
+</div>
+</div>
+
+<div class="spacer-sm"></div>
+
+<!-- Step 2: Physical (Box) -->
+<div class="grid-2">
+<div class="box-render interactive">
+<img src="gear.png" alt="Physical Loot Crate containing Apron and Lanyard">
+</div>
+<div>
+<span class="chapter-label" style="border:none; padding:0; color:#888;">Step 02</span>
+<h3 class="headline-md" style="font-size: 2rem;">The "Loot Crate"</h3>
+<p>Digital apps are passive. Real careers are active. Booking a slot triggers a physical delivery 48 hours before the start date.</p>
+<p><b>The Insight:</b> Wearing the apron/uniform creates a psychological shift from "Student" to "Professional." It builds muscle memory.</p>
+</div>
+</div>
+
+<div class="spacer-sm"></div>
+
+<!-- Step 3: Analysis -->
+<div class="grid-2">
+<div>
+<span class="chapter-label" style="border:none; padding:0; color:#888;">Step 03</span>
+<h3 class="headline-md" style="font-size: 2rem;">Data: The Radar Graph</h3>
+<p>Traditional tests measure memory. Sandbox Semester measures <b>Aptitude</b>.</p>
+<p>The app triangulates <b>Voice Stress</b> and <b>Completion Rate</b> to detect Flow State.</p>
+<p><b>The Output:</b> A Skill Radar Graph showing <i>Grit, Logic, and Creativity.</i></p>
+</div>
+<div class="phone-frame interactive">
+<img src="analyis.jpeg" alt="Analysis Screen showing Radar Graph">
+</div>
+</div>
+</section>
+<!-- 06. THE PARENT ECOSYSTEM -->
+<section id="parents" class="container">
+    <div class="spacer"></div>
+    <div class="grid-2">
+        
+        <!-- VISUAL: NOTIFICATION STACK -->
+        <div class="notif-stack">
+            <!-- Notification 1: Market Data -->
+            <div class="notif-card">
+                <div class="notif-icon">📈</div>
+                <div style="flex:1;">
+                    <h5 style="font-size:0.9rem; font-weight:700; margin-bottom:4px;">Scope Alert</h5>
+                    <p style="font-size:0.8rem; margin:0; color:#666;">Did you know? The Culinary Industry in India is projected to grow by 12% next year.</p>
+                </div>
+            </div>
+
+            <!-- Notification 2: Progress Update -->
+            <div class="notif-card">
+                <div class="notif-icon">✅</div>
+                <div style="flex:1;">
+                    <h5 style="font-size:0.9rem; font-weight:700; margin-bottom:4px;">Milestone Unlocked</h5>
+                    <p style="font-size:0.8rem; margin:0; color:#666;">Ishan just completed the "Knife Skills" module. View his Video Log.</p>
+                </div>
+            </div>
+
+            <!-- Notification 3: Education -->
+            <div class="notif-card">
+                <div class="notif-icon">📰</div>
+                <div style="flex:1;">
+                    <h5 style="font-size:0.9rem; font-weight:700; margin-bottom:4px;">Myth Buster</h5>
+                    <p style="font-size:0.8rem; margin:0; color:#666;">Read: "Why modern Design careers are as stable as Engineering."</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- TEXT CONTENT -->
+        <div>
+            <span class="chapter-label">06 / The Secondary User</span>
+            <h2 class="headline-md">Designing for the "Gatekeeper."</h2>
+            <p>If the parent says "No," the product fails. I designed a passive <b>Parent Notification System</b> to build trust without being intrusive.</p>
+            <p>Instead of just seeing "Grades," parents receive <b>Scope Articles</b> and <b>Progress Updates</b>. This educates them on the viability of non-traditional careers, solving the "Trust Gap" identified in the research.</p>
+        </div>
+
+    </div>
+</section>
+
+<!-- NEW SECTION: BUSINESS VIABILITY -->
+<section id="parent" class="container">
+<div class="spacer"></div>
+<div class="reading-width">
+<span class="chapter-label">06 / Business Viability</span>
+<h2 class="headline-md">Who pays for the box?</h2>
+<p>A physical "Loot Crate" model is expensive logistically. To ensure scalability and affordability, the business model relies on a <b>Tri-Party Ecosystem</b>.</p>
+</div>
+
+<div class="grid-3" style="margin-top: 50px;">
+<div style="background: #fff; padding: 30px; border-radius: 12px; border: 1px solid #eee; height: 100%;">
+<div style="width: 40px; height: 40px; background: #000; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-bottom: 20px;">$</div>
+<h4 style="font-size: 1.1rem; margin-bottom: 10px;">The Revenue Model</h4>
+<p style="font-size: 0.9rem; color: #555; margin-bottom: 15px;"><b>Freemium + Transactional.</b></p>
+<ul style="font-size: 0.85rem; color: #666; padding-left: 20px; line-height: 1.6;">
+<li><b>App (Free):</b> Low barrier to entry. Acts as a lead magnet.</li>
+<li><b>Kit (Paid):</b> Parents pay per "Experience." This lowers risk compared to paying a massive annual counselor fee.</li>
+</ul>
+</div>
+
+<div style="background: #fff; padding: 30px; border-radius: 12px; border: 1px solid #eee; height: 100%;">
+<div style="width: 40px; height: 40px; background: var(--mustard); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-bottom: 20px;">%</div>
+<h4 style="font-size: 1.1rem; margin-bottom: 10px;">The Cost Subsidy</h4>
+<p style="font-size: 0.9rem; color: #555; margin-bottom: 15px;"><b>Corporate Sponsorship.</b></p>
+<p style="font-size: 0.85rem; color: #666; line-height: 1.6;">
+The "Chef Kit" isn't just a product; it's a marketing channel. Brands (e.g., Masterchef) subsidize the cost of the box for brand placement.
+</p>
+</div>
+
+<div style="background: #fff; padding: 30px; border-radius: 12px; border: 1px solid #eee; height: 100%;">
+<div style="width: 40px; height: 40px; background: #000; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-bottom: 20px;">⭯</div>
+<h4 style="font-size: 1.1rem; margin-bottom: 10px;">Scalability (B2B)</h4>
+<p style="font-size: 0.9rem; color: #555; margin-bottom: 15px;"><b>School Partnerships.</b></p>
+<p style="font-size: 0.85rem; color: #666; line-height: 1.6;">
+By selling B2B to schools, we ship "Classroom Packs" (30 kits at once), reducing logistics costs by ~40%.
+</p>
+</div>
+</div>
+</section>
+
+<!-- 07. IMPACT & LEARNINGS -->
+<section id="impact" class="container">
+<div class="spacer"></div>
+<div style="background: var(--ink-primary); color: #fff; padding: clamp(30px, 5vw, 60px); border-radius: var(--radius);">
+<div style="text-align: center; margin-bottom: 50px;">
+<h2 style="color: #fff; margin-bottom: 10px;">The Outcomes</h2>
+<p style="color: #999; max-width: 600px; margin: 0 auto;">
+Testing with 15 students and 5 parents revealed a clear divergence between "Passive Watching" (App) and "Active Doing" (Kit).
+</p>
+</div>
+
+<div class="grid-2" style="align-items: flex-start;">
+<!-- METRIC 1 -->
+<div style="border-right: 1px solid rgba(255,255,255,0.1); padding-right: clamp(0px, 2vw, 40px);">
+<div style="font-family: var(--font-brand); font-size: clamp(2.5rem, 4vw, 3.5rem); color: var(--mustard); font-weight: 700; line-height: 1; margin-bottom: 15px;">
+80% <span style="font-size: 1.5rem; color: #666; font-weight: 400;">vs</span> 40%
+</div>
+<h4 style="color: #fff; font-size: 1.1rem; margin-bottom: 15px;">Retention Rate (Kit vs. Video)</h4>
+<p style="font-size: 0.9rem; color: #aaa; line-height: 1.6; margin-bottom: 0;">
+<b>The Insight:</b> While 60% of students dropped off during the passive "Video Trailers," 12 out of 15 students completed the entire physical "Knife Skills" module.
+</p>
+</div>
+
+<!-- METRIC 2 -->
+<div style="padding-left: clamp(0px, 2vw, 40px);">
+<div style="font-family: var(--font-brand); font-size: clamp(2rem, 4vw, 3.5rem); color: var(--mustard); font-weight: 700; line-height: 1; margin-bottom: 15px;">
+"Is he good?"
+</div>
+<h4 style="color: #fff; font-size: 1.1rem; margin-bottom: 15px;">Shift in Parent Dialogue</h4>
+<p style="font-size: 0.9rem; color: #aaa; line-height: 1.6; margin-bottom: 0;">
+<b>The Insight:</b> Before the app, parent questions were financial (<i>"Does this pay?"</i>). After seeing the 'Scope Reports' and video logs, questions shifted to aptitude.
+</p>
+</div>
+</div>
+</div>
+</section>
+
+<!-- 08. EDGE CASES & FRICTION -->
+<section class="container">
+<div class="spacer"></div>
+<div class="reading-width">
+<span class="chapter-label">08 / Edge Cases & Friction</span>
+<h2 class="headline-md">Designing for the Margins.</h2>
+<p>A product isn't finished until it handles failure gracefully. I stress-tested the "Happy Path" to find potential pitfalls.</p>
+</div>
+
+<div class="grid-3" style="margin-top: 50px;">
+<!-- 1. FAILURE STATE (PSYCHOLOGY) -->
+<div class="insight-card" style="border-left: 4px solid #D93025;">
+<h4 style="font-size: 1.1rem; margin-bottom: 15px;">The "Happy Failure" State</h4>
+<p style="font-size: 0.85rem; color: #555; margin-bottom: 10px;"><b>Scenario:</b> A student tries the "Coding Kit," hates it, and gets a low aptitude score.</p>
+<p style="font-size: 0.85rem; color: #555;"><b>The UX Pivot:</b> Standard apps show red text ("Low Score"). I reframed this as a <b>Financial Win</b>: "You just saved ₹8 Lakhs on a degree you wouldn't enjoy."</p>
+</div>
+
+<!-- 2. PRIVACY FIRST (THE TECH PIVOT) -->
+<div class="insight-card" style="border-left: 4px solid var(--mustard);">
+<h4 style="font-size: 1.1rem; margin-bottom: 15px;">Pivot: No Facial Scanning</h4>
+<p style="font-size: 0.85rem; color: #555; margin-bottom: 10px;"><b>Concept:</b> Initially considered facial recognition for sentiment.</p>
+<p style="font-size: 0.85rem; color: #555;"><b>Why I Killed It:</b> Privacy risks with minors. Switched to <b>Voice Tone Analysis</b> which is less invasive and more reliable on low-end hardware.</p>
+</div>
+
+<!-- 3. ACCESSIBILITY -->
+<div class="insight-card" style="border-left: 4px solid #222;">
+<h4 style="font-size: 1.1rem; margin-bottom: 15px;">Accessibility: Audio First</h4>
+<p style="font-size: 0.85rem; color: #555; margin-bottom: 10px;"><b>Constraint:</b> Users cannot touch the screen while their hands are covered in clay, grease, or food.</p>
+<p style="font-size: 0.85rem; color: #555;"><b>The Solution:</b> Implemented <b>"Wave to Pause"</b> (gesture control) and Auto-Subtitles for noisy workshops.</p>
+</div>
+</div>
+</section>
+
+<!-- ALL SCREENS -->
+<section class="container">
+<div class="spacer-sm"></div>
+<div style="text-align: center; margin-bottom: 60px;">
+<span class="chapter-label" style="display:inline-block; border:none; padding:0;">High Fidelity</span>
+<h2 class="headline-md">All Screens.</h2>
+<p style="color: var(--ink-secondary);">A bird's eye view of the complete user journey.</p>
+</div>
+
+<div class="interactive" style="width: 100%; background-color: #F4F4F4; border-radius: var(--radius); padding: clamp(20px, 5vw, 60px); border: 1px solid #eee; box-shadow: 0 20px 60px rgba(0,0,0,0.05);">
+<img src="career all screens.jpg" alt="Full UI Screen Collection" style="width: 100%; height: auto; display: block; border-radius: 8px;">
+</div>
+</section>
+
+<div class="spacer"></div>
+
+<footer style="text-align: center; padding-bottom: 100px;">
+<p style="color: #888;">Next Case Study</p>
+<a href="style.html" style="font-family: var(--font-head); font-weight: 800; font-size: 2rem; text-decoration: none; color: var(--ink-primary);">Ai stylist app -></a>
+</footer>
+
+<!-- SCRIPT FOR CURSOR -->
+<script>
+if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+const dot = document.querySelector('.cursor-dot');
+const outline = document.querySelector('.cursor-outline');
+
+let mx = 0, my = 0;
+let ox = 0, oy = 0;
+
+document.addEventListener('mousemove', e => {
+mx = e.clientX;
+my = e.clientY;
+dot.style.top = `${my}px`;
+dot.style.left = `${mx}px`;
+});
+
+function animateCursor() {
+ox += (mx - ox) * 0.15;
+oy += (my - oy) * 0.15;
+outline.style.top = `${oy}px`;
+outline.style.left = `${ox}px`;
+requestAnimationFrame(animateCursor);
+}
+animateCursor();
+
+const interactives = document.querySelectorAll('.interactive, a, button');
+interactives.forEach(el => {
+el.addEventListener('mouseenter', () => document.body.classList.add('hovering'));
+el.addEventListener('mouseleave', () => document.body.classList.remove('hovering'));
+});
+}
+</script>
+</body>
+</html>
+
+
+
+
