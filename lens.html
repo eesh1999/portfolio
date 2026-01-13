@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Inversion | Thermal AR</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --neon-cyan: #00F0FF;
+            --neon-orange: #FF3D00;
+            --neon-purple: #B026FF;
+        }
+
+        body {
+            margin: 0;
+            background: #000;
+            height: 100vh;
+            overflow: hidden;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .thermal-viewport {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            /* FALLBACK: If image breaks, show this cool gradient */
+            background: linear-gradient(135deg, #1a0b2e, #4a0045, #ff4d00);
+        }
+
+        /* THE IMAGE LAYER */
+        .camera-feed {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            /* Apply the Thermal Heat Map Filter */
+            filter: grayscale(100%) contrast(1.5) brightness(1.1) url('#heatMap');
+            transform: scale(1.05);
+            animation: breathe 8s infinite ease-in-out;
+            opacity: 0.9;
+        }
+
+        /* NOISE GRAIN (Crucial for realism) */
+        .sensor-grain {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.15'/%3E%3C/svg%3E");
+            opacity: 0.4;
+            pointer-events: none;
+            mix-blend-mode: overlay;
+        }
+
+        /* HUD ELEMENTS */
+        .hud-layer {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            box-shadow: inset 0 0 100px rgba(0,0,0,0.8);
+        }
+
+        /* SCANLINES */
+        .scanlines {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: repeating-linear-gradient(
+                to bottom,
+                transparent 0px,
+                transparent 2px,
+                rgba(0,0,0,0.3) 3px
+            );
+            z-index: 5;
+        }
+
+        /* 1. RETICLE */
+        .reticle-group {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .center-dot {
+            width: 6px; height: 6px;
+            background: var(--neon-cyan);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--neon-cyan);
+            margin: 0 auto;
+        }
+        .outer-ring {
+            width: 280px; height: 280px;
+            border: 1px dashed rgba(255,255,255,0.4);
+            border-radius: 50%;
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            animation: spin-slow 30s linear infinite;
+        }
+        .arc-ring {
+            width: 320px; height: 320px;
+            border: 2px solid transparent;
+            border-top: 2px solid var(--neon-cyan);
+            border-bottom: 2px solid var(--neon-cyan);
+            border-radius: 50%;
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0.5;
+            animation: spin-reverse 10s linear infinite;
+        }
+
+        /* 2. TARGET BOX */
+        .target-box {
+            position: absolute;
+            top: 35%; left: 65%;
+            width: 100px; height: 100px;
+            border: 2px solid var(--neon-orange);
+            box-shadow: 0 0 15px var(--neon-orange);
+            display: flex;
+            align-items: flex-start;
+            justify-content: flex-start;
+        }
+        .target-label {
+            position: absolute;
+            top: -20px; left: 0;
+            background: var(--neon-orange);
+            color: black;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 2px 5px;
+        }
+
+        /* 3. TRAJECTORY LINE */
+        .trajectory-svg {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            filter: drop-shadow(0 0 5px var(--neon-cyan));
+        }
+        .dash-path {
+            fill: none;
+            stroke: var(--neon-cyan);
+            stroke-width: 2;
+            stroke-dasharray: 10, 15;
+            animation: march-ants 1s linear infinite;
+        }
+
+        /* 4. TEXT WIDGETS */
+        .data-block {
+            position: absolute;
+            color: white;
+            font-size: 12px;
+            line-height: 1.6;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+        }
+        .top-left { top: 40px; left: 40px; border-left: 3px solid white; padding-left: 15px; }
+        .btm-right { bottom: 40px; right: 40px; text-align: right; }
+        .temp-reading { font-size: 32px; font-weight: 800; color: var(--neon-orange); }
+
+        /* ANIMATIONS */
+        @keyframes spin-slow { 100% { transform: translate(-50%, -50%) rotate(360deg); } }
+        @keyframes spin-reverse { 100% { transform: translate(-50%, -50%) rotate(-360deg); } }
+        @keyframes march-ants { to { stroke-dashoffset: -25; } }
+        @keyframes breathe { 0%, 100% { transform: scale(1.05); } 50% { transform: scale(1.08); } }
+
+    </style>
+</head>
+<body>
+
+    <!-- SVG FILTERS (The Math behind the colors) -->
+    <svg width="0" height="0">
+        <filter id="heatMap">
+            <feComponentTransfer>
+                <!-- R: Maps dark to purple, mid to red, bright to yellow -->
+                <feFuncR type="table" tableValues="0.1 0.5 1 1 1"/>
+                <!-- G: Maps dark to low, mid to orange, bright to white -->
+                <feFuncG type="table" tableValues="0 0 0.2 0.8 1"/>
+                <!-- B: Maps dark to purple, kills blue in mid-tones -->
+                <feFuncB type="table" tableValues="0.5 0 0 0 0.8"/>
+            </feComponentTransfer>
+        </filter>
+    </svg>
+
+    <div class="thermal-viewport">
+        <!-- 
+           NEW IMAGE: Using a high-contrast architectural shot. 
+           If this fails, the CSS gradient background will show instead.
+        -->
+        <img class="camera-feed" src="https://images.unsplash.com/photo-1506509036594-816e8b0b555e?q=80&w=2500&auto=format&fit=crop" alt="AR Feed" crossorigin="anonymous">
+
+        <div class="sensor-grain"></div>
+        <div class="scanlines"></div>
+
+        <!-- TRAJECTORY PATH -->
+        <svg class="trajectory-svg">
+            <!-- Curve connects bottom center to the target box -->
+            <path class="dash-path" d="M 50% 100% Q 55% 60% 68% 40%" /> 
+        </svg>
+
+        <div class="hud-layer">
+            
+            <div class="reticle-group">
+                <div class="outer-ring"></div>
+                <div class="arc-ring"></div>
+                <div class="center-dot"></div>
+            </div>
+
+            <div class="target-box">
+                <div class="target-label">ANCHOR_LOCK</div>
+            </div>
+
+            <div class="data-block top-left">
+                <div>SYS: ONLINE</div>
+                <div>G-FORCE: -1.2G</div>
+                <div style="color:var(--neon-purple)">MODE: THERMAL_AR</div>
+            </div>
+
+            <div class="data-block btm-right">
+                <div class="temp-reading">42°C</div>
+                <div>SURFACE TEMP</div>
+                <div style="font-size:10px; opacity:0.7;">DIST: 3.4m</div>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+</html>

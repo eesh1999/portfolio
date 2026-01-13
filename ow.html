@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Inversion | Speculative UX Study</title>
+    
+    <!-- FONTS -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Manrope:wght@400;500;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <style>
+        /* --- 1. DESIGN TOKENS (Updated for Thermal Theme) --- */
+        :root {
+            /* Backgrounds */
+            --bg-page: #050505; /* Deep Space Black */
+            --bg-card: #111111;
+            --bg-highlight: #1A1A1A;
+            
+            /* Typography */
+            --ink-primary: #FFFFFF;
+            --ink-secondary: #AAAAAA;
+            --ink-tertiary: #666666;
+            
+            /* Accents - The "Thermal" Palette */
+            --thermal-hot: #FFFFFF;       /* 100% Heat */
+            --thermal-warm: #FF4D00;      /* Body Heat (Orange) */
+            --thermal-cool: #8A2BE2;      /* Cold/Ambient (Purple) */
+            --thermal-dim: #2a1a1a;       /* UI Borders */
+            
+            /* Fonts */
+            --font-head: 'Manrope', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --font-brand: 'Space Grotesk', sans-serif;
+            --font-code: 'JetBrains Mono', monospace;
+            
+            /* Spacing */
+            --spacing-lg: clamp(80px, 10vw, 160px); 
+            --spacing-md: clamp(40px, 5vw, 80px);
+            --container-pad: clamp(20px, 5vw, 50px);
+            --radius: 12px;
+        }
+
+        /* RESET */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            background-color: var(--bg-page);
+            color: var(--ink-primary);
+            font-family: var(--font-body);
+            line-height: 1.6;
+            font-size: 18px;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* --- 2. TYPOGRAPHY --- */
+        h1, h2, h3, h4 { 
+            font-family: var(--font-head); 
+            color: var(--ink-primary); 
+            font-weight: 800; 
+            letter-spacing: -0.02em; 
+            line-height: 1.1;
+        }
+
+        .headline-lg { font-size: clamp(3rem, 7vw, 5.5rem); margin-bottom: 24px; }
+        .headline-md { font-size: clamp(2rem, 4vw, 3rem); margin-bottom: 20px; }
+        
+        .body-lead { 
+            font-size: clamp(1.1rem, 2vw, 1.4rem); 
+            color: var(--ink-secondary); 
+            line-height: 1.6; 
+            font-weight: 300; 
+            margin-bottom: 40px; 
+            max-width: 800px; 
+        }
+        
+        p { margin-bottom: 24px; color: var(--ink-secondary); }
+
+        .chapter-label {
+            font-family: var(--font-code);
+            font-size: 12px; font-weight: 500; 
+            color: var(--thermal-warm); 
+            text-transform: uppercase; letter-spacing: 2px;
+            margin-bottom: 24px; display: block;
+            border-left: 2px solid var(--thermal-warm); padding-left: 12px;
+        }
+
+        /* --- 3. LAYOUT --- */
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 var(--container-pad); }
+        .reading-width { max-width: 780px; margin: 0 auto; padding: 0 var(--container-pad); }
+        .spacer { height: var(--spacing-lg); }
+        .spacer-sm { height: var(--spacing-md); }
+        
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(40px, 5vw, 80px); align-items: center; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+
+        /* --- 4. NAVIGATION --- */
+        .case-nav {
+            position: fixed; top: 0; left: 0; width: 100%;
+            background: rgba(5,5,5,0.85); backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(255,255,255,0.1); z-index: 1000;
+            padding: 16px 0;
+        }
+        .nav-inner { display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto; padding: 0 var(--container-pad); }
+        
+        .nav-back {
+            text-decoration: none; color: var(--ink-primary); font-weight: 700;
+            font-family: var(--font-brand); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px;
+            display: flex; align-items: center; gap: 8px; transition: color 0.2s;
+        }
+        .nav-back:hover { color: var(--thermal-warm); }
+
+        .nav-menu { display: flex; gap: 32px; }
+        .nav-item { 
+            text-decoration: none; color: var(--ink-secondary); font-size: 12px; 
+            font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+            transition: color 0.2s;
+        }
+        .nav-item:hover { color: var(--thermal-warm); }
+
+        /* --- 5. COMPONENTS --- */
+        
+        /* Stats Bar */
+        .stats-bar {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;
+            border-top: 1px solid #333; border-bottom: 1px solid #333;
+            padding: 40px 0; margin-top: 60px;
+        }
+        .stat-label { font-family: var(--font-code); font-size: 11px; text-transform: uppercase; color: var(--ink-tertiary); margin-bottom: 8px; }
+        .stat-value { font-size: 16px; font-weight: 500; color: var(--ink-primary); }
+
+        /* Insight Card */
+        .insight-card {
+            background: var(--bg-card); padding: 30px;
+            border: 1px solid #222; border-radius: var(--radius);
+            height: 100%; transition: 0.3s;
+        }
+        .insight-card:hover { border-color: var(--thermal-warm); }
+        .insight-icon { font-size: 2rem; margin-bottom: 20px; color: var(--thermal-warm); }
+        .insight-title { font-family: var(--font-brand); font-size: 1.2rem; margin-bottom: 10px; color: #fff; }
+
+        /* Evolution/Pivot Block */
+        .evolution-block {
+            background: var(--bg-highlight); border-radius: var(--radius);
+            padding: 30px; margin-bottom: 30px;
+            display: flex; align-items: center; justify-content: space-between; gap: 20px;
+            border: 1px solid #333;
+        }
+        .evo-state { flex: 1; text-align: center; }
+        .evo-arrow { color: var(--thermal-warm); font-size: 1.5rem; }
+        .evo-label { font-family: var(--font-code); font-size: 10px; text-transform: uppercase; color: var(--ink-tertiary); display: block; margin-bottom: 8px; }
+        .evo-text { font-weight: 600; color: #fff; }
+
+        /* Design System / Color Bar */
+        .ds-container { background: var(--bg-card); padding: 40px; border-radius: var(--radius); border: 1px solid #333; }
+        .temp-scale {
+            width: 100%; height: 60px; border-radius: 8px; margin: 20px 0;
+            background: linear-gradient(90deg, #1A0B2E 0%, #4B0082 30%, #FF4D00 80%, #FFFFFF 100%);
+            position: relative;
+        }
+        .temp-labels { display: flex; justify-content: space-between; font-family: var(--font-code); font-size: 12px; color: #888; }
+
+        /* Visual Containers */
+        .visual-box {
+            width: 100%; aspect-ratio: 16/9; background: #111; 
+            border: 1px solid #333; border-radius: var(--radius);
+            display: flex; align-items: center; justify-content: center; overflow: hidden;
+            position: relative;
+        }
+        .visual-box img { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; }
+        
+        .lens-ui {
+          width: 100%; max-width: 400px; aspect-ratio: 1/1; 
+          background: rgba(255, 255, 255, 0.05); /* Faint glass tint */
+             backdrop-filter: blur(8px); /* The blur effect */
+          -webkit-backdrop-filter: blur(8px);
+          border-radius: 50%; 
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          box-shadow: 0 0 30px rgba(255, 77, 0, 0.15), inset 0 0 20px rgba(255, 255, 255, 0.05);
+          position: relative; margin: 0 auto;
+         }
+         
+        .lens-overlay {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            border: 1px dashed rgba(255, 77, 0, 0.5); width: 80%; height: 80%; border-radius: 50%;
+        }
+        /* Styling for the high-res HUD image */
+        .hud-image-main {
+            width: 100%;
+            height: auto;
+            border-radius: var(--radius);
+            border: 1px solid #333;
+            display: block;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            transition: transform 0.5s ease;
+        }
+
+        .hud-image-main:hover {
+            transform: scale(1.02);
+            border-color: var(--thermal-warm);
+        }
+
+        /* Specific fix for the solution section breakout */
+        .full-width-breakout {
+        grid-column: 1 / -1;
+        margin-top: 40px;
+        }
+
+        /* --- RESPONSIVE --- */
+        @media (max-width: 900px) {
+            .grid-2, .grid-3 { grid-template-columns: 1fr; gap: 40px; }
+            .stats-bar { grid-template-columns: 1fr 1fr; gap: 30px; }
+            .evolution-block { flex-direction: column; text-align: center; }
+            .evo-arrow { transform: rotate(90deg); }
+            .nav-menu { display: none; }
+            .lens-ui { max-width: 300px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NAV -->
+    <nav class="case-nav">
+        <div class="nav-inner">
+            <a href="work.html" class="nav-back">
+                <span>←</span> Portfolio
+            </a>
+            <div class="nav-menu">
+                <a href="#premise" class="nav-item">Premise</a>
+                <a href="#research" class="nav-item">Research</a>
+                <a href="#system" class="nav-item">Kelvin System</a>
+                <a href="#solutions" class="nav-item">Ecosystem</a>
+                <a href="#process" class="nav-item">Iteration</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <header class="container" style="padding-top: 160px; padding-bottom: 80px;">
+        <span class="chapter-label">Speculative Design • 2025</span>
+        <h1 class="headline-lg">Project <span style="color:var(--thermal-warm);">Inversion.</span></h1>
+        <p class="body-lead">
+            UX strategies for a reversed reality. An exploration of interface and spatial interaction in a world governed by reverse gravity, infrared optics, and solid-state water.
+        </p>
+        
+        <!-- Hero Image Placeholder -->
+        <div class="hud-image-container" style="margin-top: 40px;">
+    <!-- Make sure to name your image file exactly as it is saved (e.g., hud-shot.png) -->
+        <img src="thermal lens.png" alt="Project Inversion HUD" class="hud-image-main">
+         <p style="font-family: var(--font-code); font-size: 10px; color: var(--ink-tertiary); margin-top: 10px; text-align: center;">
+        FIG 1.0: NAVIGATIONAL HUD OVERLAYING CEILING-FLOOR ARCHITECTURE
+        </p>
+         </div>
+
+        <div class="stats-bar">
+            <div><div class="stat-label">Role</div><div class="stat-value">UX/UI & Concept</div></div>
+            <div><div class="stat-label">Duration</div><div class="stat-value">4 Weeks</div></div>
+            <div><div class="stat-label">Tools</div><div class="stat-value">Figma, Blender, VR</div></div>
+            <div><div class="stat-label">Focus</div><div class="stat-value">Systems Thinking</div></div>
+        </div>
+    </header>
+
+    <!-- 01 PREMISE -->
+    <section id="premise" class="reading-width">
+        <div class="spacer"></div>
+        <span class="chapter-label">01 / The Premise</span>
+        <h2 class="headline-md">When physics breaks, Design begins.</h2>
+        <p>This project is a thought experiment: What happens to "User Experience" when the fundamental laws of nature are inverted? I simulated a civilization dealing with three constraints:</p>
+        <ul style="list-style: none; margin-top: 30px; color: var(--ink-secondary);">
+            <li style="margin-bottom: 15px; border-left: 2px solid #333; padding-left: 20px;">
+                <strong style="color: #fff;">1. Reverse Gravity:</strong> Objects fall to the sky. Ceilings are floors.
+            </li>
+            <li style="margin-bottom: 15px; border-left: 2px solid #333; padding-left: 20px;">
+                <strong style="color: #fff;">2. Infrared Vision:</strong> Humans perceive heat, not light. Color theory is obsolete.
+            </li>
+            <li style="margin-bottom: 15px; border-left: 2px solid #333; padding-left: 20px;">
+                <strong style="color: #fff;">3. Solid Water:</strong> H2O is rock-hard at room temp. It must be "manufactured."
+            </li>
+        </ul>
+    </section>
+
+    <!-- 02 RESEARCH -->
+    <section id="research" class="container">
+        <div class="spacer"></div>
+        <div class="reading-width">
+            <span class="chapter-label">02 / Research</span>
+            <h2 class="headline-md">Studying the Extremes.</h2>
+            <p>To design for the unknown, I studied the extremes of the known. I referenced NASA microgravity reports and biological thermoreception.</p>
+        </div>
+
+
+        <div class="grid-3" style="margin-top: 50px;">
+            <div class="insight-card">
+                <div class="insight-icon">🐍</div>
+                <div class="insight-title">Bio-Mimicry</div>
+                <p style="font-size: 0.9rem;">Vipers navigate via heat gradients. In an IR world, "Brightness" equals "Heat." Information hierarchy must follow temperature rules.</p>
+            </div>
+            <div class="insight-card">
+                <div class="insight-icon">👩‍🚀</div>
+                <div class="insight-title">Zero-G Ergonomics</div>
+                <p style="font-size: 0.9rem;">In space, you don't "walk." You push and glide. Furniture isn't for sitting; it's for containment and anchoring.</p>
+            </div>
+            <div class="insight-card">
+                <div class="insight-icon">❄️</div>
+                <div class="insight-title">Material Science</div>
+                <p style="font-size: 0.9rem;">Using Aluminum Nitride (AlN) for appliances allows for instant thermal transfer without electrical shock risks.</p>
+            </div>
+        </div>
+            <!-- VISUAL EVIDENCE ADDITION -->
+        <div class="spacer-sm"></div>
+        
+        <div style="border-top: 1px solid #222; padding-top: 40px;">
+            <div class="reading-width">
+                <h3 class="headline-md" style="font-size: 1.8rem;">Mapping the Physics.</h3>
+                <p>Before designing the interface, I had to "redesign" daily life. I mapped out how wildlife adapts to zero-gravity (Gliders vs. clingers) and how a society functions when water is a solid rock that must be melted for use.</p>
+            </div>
+
+            <!-- THE IMAGE CONTAINER -->
+            <div style="
+                margin-top: 30px;
+                background: var(--bg-card);
+                border: 1px solid #333;
+                border-radius: var(--radius);
+                padding: 10px;
+                position: relative;
+            ">
+                <!-- SCIFI DECORATION HEADER -->
+                <div style="
+                    display: flex; justify-content: space-between; 
+                    padding: 0 10px 10px 10px; 
+                    border-bottom: 1px dashed #333; 
+                    margin-bottom: 10px;
+                ">
+                    <span style="font-family: var(--font-code); color: var(--thermal-warm); font-size: 10px;">FILE: WORLD_LOGIC_V1</span>
+                    <span style="font-family: var(--font-code); color: var(--ink-tertiary); font-size: 10px;">// UNCLASSIFIED</span>
+                </div>
+
+                <!-- YOUR IMAGE -->
+                <img src="inversion 1.jpg" alt="Brainstorming board showing Wildlife Adaptations and Solid Water logic" style="
+                    width: 100%; 
+                    height: auto; 
+                    display: block; 
+                    border-radius: 4px; 
+                    opacity: 0.9;
+                ">
+            </div>
+            
+            <p style="font-family: var(--font-code); font-size: 11px; color: var(--ink-tertiary); margin-top: 15px; text-align: center;">
+                FIG 2.1: BRAINSTORMING ARTIFACT - MAPPING "SOLID WATER" ECONOMICS & INFRARED BIOLOGY
+            </p>
+        </div>
+    </section>
+
+    <!-- 03 DESIGN SYSTEM (GOOGLE WORTHY ADDITION) -->
+    <section id="system" class="container">
+        <div class="spacer"></div>
+        <span class="chapter-label">03 / The Visual Language</span>
+        <h2 class="headline-md">Defining the Kelvin Scale.</h2>
+        <div class="grid-2">
+            <div>
+                <p>Traditional RGB color codes fail here. I created a Design System based on <strong>Temperature Deltas (ΔT)</strong>.</p>
+                <p>UI elements must be hotter than the user's body temperature to be visible. Cold areas represent "Negative Space" or danger.</p>
+                <div style="margin-top: 30px;">
+                    <div style="display:flex; align-items:center; margin-bottom:10px;">
+                        <span style="width:12px; height:12px; background:#fff; border-radius:50%; margin-right:10px; box-shadow: 0 0 10px #fff;"></span>
+                        <span style="font-family:var(--font-code); font-size:14px;">Action (White Hot)</span>
+                    </div>
+                    <div style="display:flex; align-items:center; margin-bottom:10px;">
+                        <span style="width:12px; height:12px; background:var(--thermal-warm); border-radius:50%; margin-right:10px;"></span>
+                        <span style="font-family:var(--font-code); font-size:14px;">Content (Body Temp)</span>
+                    </div>
+                    <div style="display:flex; align-items:center;">
+                        <span style="width:12px; height:12px; background:var(--thermal-cool); border-radius:50%; margin-right:10px; opacity:0.5;"></span>
+                        <span style="font-family:var(--font-code); font-size:14px;">Background (Ambient)</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="ds-container">
+                <h4 style="margin-bottom:10px;">Thermal Gradient UI</h4>
+                <div class="temp-scale"></div>
+                <div class="temp-labels">
+                    <span>-20°C (Invisible)</span>
+                    <span>37°C (Visible)</span>
+                    <span>100°C (Critical)</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 04 SOLUTIONS -->
+    <section id="solutions" class="container">
+        <div class="spacer"></div>
+        
+        <!-- Product -->
+    <div class="grid-2">
+      <div>
+        <span class="chapter-label" style="border:none; padding:0; color:var(--ink-tertiary);">Hardware & Wearables</span>
+        <h3 class="headline-md">The Thermal Lens.</h3>
+        <p>Hands are for survival (holding tethers), not holding devices. I moved the UI to a Heads-Up Display (HUD).</p>
+        <p><strong>UX Logic:</strong> By utilizing a dual-tone palette—Cyan for System Feedback and Thermal-Spectrum for Environmental Data—the user can instantly distinguish between the digital interface and the physical world.</p>
+      </div>
+    
+    <!-- This "breakout" uses the full width of the grid to show off your detail -->
+      <div class="full-width-breakout">
+        <img src="thermal lens.png" alt="HUD Detail Interface" class="hud-image-main">
+      </div>
+    </div>
+
+        <div class="spacer-sm"></div>
+
+        <!-- Wearable (New Addition) -->
+        <div class="grid-2">
+            <div>
+                <p><strong>Ghost Hands Feature:</strong> The AR system projects a "trajectory path" onto distant rails, showing the user exactly how much force is needed to glide safely.</p>
+            </div>
+            <div style="display:flex; justify-content:center;">
+                <div class="lens-ui">
+                    <div class="lens-overlay"></div>
+                    <!-- Mockup content inside lens -->
+                    <div style="position:absolute; top:40%; left:50%; transform:translate(-50%, -50%); text-align:center;">
+                        <div style="color:var(--thermal-warm); font-family:var(--font-code); font-size:12px;">ANCHOR POINT DETECTED</div>
+                        <div style="font-size:24px; color:#fff; font-weight:bold;">12m</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 05 ACCESSIBILITY & ITERATION -->
+    <section id="process" class="reading-width">
+        <div class="spacer"></div>
+        <span class="chapter-label">05 / Iteration & Accessibility</span>
+        <h2 class="headline-md">Designing for "Thermal Blindness."</h2>
+        <p>What if a user can't see heat? I designed a <strong>Haptic Language</strong> for the boots.</p>
+        <ul style="margin-bottom: 60px; color: var(--ink-secondary);">
+            <li><strong>Solid Hum:</strong> Securely Anchored.</li>
+            <li><strong>Rapid Pulse:</strong> Approaching Cold Zone (Drop-off).</li>
+        </ul>
+
+        <h3 class="headline-md" style="font-size: 1.8rem;">The "Dark Mode" Failure.</h3>
+        <p>Juniors show perfect work; Seniors show what broke. Here is my failed iteration.</p>
+        
+        <div class="evolution-block">
+            <div class="evo-state">
+                <span class="evo-label">Attempt 1</span>
+                <div class="evo-text" style="color:#d55;">Red UI on Dark Background</div>
+                <div style="font-size:12px; margin-top:5px; color:#888;">Failed: Blended with human body heat</div>
+            </div>
+            <div class="evo-arrow">→</div>
+            <div class="evo-state">
+                <span class="evo-label">Solution</span>
+                <div class="evo-text" style="color:#fff;">White-Hot UI Overlay</div>
+                <div style="font-size:12px; margin-top:5px; color:#888;">Success: Artificial heat > Bio heat</div>
+            </div>
+        </div>
+    </section>
+    <!-- 06 AI COLLABORATION -->
+    <section id="ai-stack" class="container">
+        <div class="spacer"></div>
+        <span class="chapter-label">06 / Collaborative AI Stack</span>
+        <h2 class="headline-md">Leveraging AI as a Co-Pilot.</h2>
+        <p class="body-lead" style="margin-bottom: 40px;">To build a logically consistent world in 4 weeks, I utilized an AI-assisted workflow for conceptual research and environment generation.</p>
+
+        <div class="grid-3">
+          <div class="insight-card">
+            <div class="stat-label" style="color:var(--thermal-warm); margin-bottom:10px;">World Building</div>
+            <h4 style="color:#fff; margin-bottom:10px;">GPT-4 / Claude</h4>
+            <p style="font-size: 0.85rem;">Used to pressure-test the biological and physical constraints of the inverted world, ensuring the 'lore' stayed scientifically plausible.</p>
+          </div>
+          <div class="insight-card">
+            <div class="stat-label" style="color:var(--thermal-warm); margin-bottom:10px;">Visual Plates</div>
+            <h4 style="color:#fff; margin-bottom:10px;">Midjourney v6</h4>
+            <p style="font-size: 0.85rem;">Generated high-fidelity architectural plates and thermal textures to serve as the 'environment' for UI legibility testing.</p>
+          </div>
+          <div class="insight-card">
+            <div class="stat-label" style="color:var(--thermal-warm); margin-bottom:10px;">Interface Logic</div>
+            <h4 style="color:#fff; margin-bottom:10px;">Human + Figma</h4>
+            <p style="font-size: 0.85rem;">Every pixel of the HUD, the Kelvin Design System, and the interaction logic was manually designed to ensure strict UX standards.</p>
+          </div>
+        </div>
+    </section>
+    <!-- 07. TRANSLATION TO REALITY -->
+    <section class="container">
+        <div class="spacer"></div>
+        <span class="chapter-label">07 / Translation to Reality</span>
+        <h2 class="headline-md">From Sci-Fi to Strategy.</h2>
+        <p class="body-lead">
+            Speculative design is a stress-test for standard patterns. 
+            <span style="color: var(--ink-primary); border-bottom: 2px solid var(--thermal-warm);">Here is how this thinking applies to real products:</span>
+        </p>
+
+        <div class="grid-2">
+            <!-- LEFT COLUMN: VISUAL SYSTEM MAPPING -->
+            <div style="background: var(--bg-card); border: 1px solid #333; border-radius: var(--radius); padding: clamp(20px, 4vw, 40px);">
+                <div style="display:flex; justify-content:space-between; margin-bottom:30px;">
+                    <h4 style="color: var(--thermal-warm); margin:0;">1. The Kelvin Logic</h4>
+                    <span style="font-family: var(--font-code); font-size: 10px; border: 1px solid var(--thermal-warm); padding: 2px 6px; border-radius: 4px; color: var(--thermal-warm);">VISUAL SYSTEMS</span>
+                </div>
+                
+                <!-- Mapping Item 1 -->
+                <div style="margin-bottom: 25px;">
+                    <div style="font-family: var(--font-code); font-size: 10px; color: #666; text-transform: uppercase; margin-bottom: 4px;">Concept</div>
+                    <div style="font-weight: 600; color: #fff; margin-bottom: 5px;">"Heat-based Visibility"</div>
+                    <div style="color: var(--thermal-warm); font-size: 1.2rem; line-height: 1; margin: 5px 0;">↓</div>
+                    <div style="font-family: var(--font-code); font-size: 10px; color: #666; text-transform: uppercase; margin-bottom: 4px;">Real Application</div>
+                    <div style="font-weight: 600; color: #fff;">Accessibility & Contrast Ratios</div>
+                    <p style="font-size: 0.85rem; margin-top: 5px; color: #999; line-height: 1.5;">
+                        Just as the Thermal UI fails if it matches body temp (37°C), real interfaces fail if the foreground/background contrast drops below WCAG AA standards (4.5:1).
+                    </p>
+                </div>
+
+                <!-- Mapping Item 2 -->
+                <div style="border-top: 1px dashed #333; padding-top: 25px;">
+                    <div style="font-weight: 600; color: #fff; margin-bottom: 5px;">"Critical Heat Spikes"</div>
+                    <div style="color: var(--thermal-warm); font-size: 1.2rem; line-height: 1; margin: 5px 0;">↓</div>
+                    <div style="font-weight: 600; color: #fff;">System Alerts & Error States</div>
+                    <p style="font-size: 0.85rem; margin-top: 5px; color: #999; line-height: 1.5;">
+                        Using "White Hot" exclusively for urgent data ensures users don't become desensitized to alerts—a direct parallel to designing error states in Fintech or SaaS.
+                    </p>
+                </div>
+            </div>
+
+            <!-- RIGHT COLUMN: SPATIAL MAPPING -->
+            <div style="background: var(--bg-card); border: 1px solid #333; border-radius: var(--radius); padding: clamp(20px, 4vw, 40px); height: 100%;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:30px;">
+                    <h4 style="color: var(--thermal-cool); margin:0;">2. The HUD Logic</h4>
+                    <span style="font-family: var(--font-code); font-size: 10px; border: 1px solid var(--thermal-cool); padding: 2px 6px; border-radius: 4px; color: var(--thermal-cool);">SPATIAL UX</span>
+                </div>
+
+                <!-- Mapping Item -->
+                <div>
+                    <div style="font-family: var(--font-code); font-size: 10px; color: #666; text-transform: uppercase; margin-bottom: 4px;">Concept</div>
+                    <div style="font-weight: 600; color: #fff; margin-bottom: 5px;">"Hands-Free Gliding"</div>
+                    <div style="color: var(--thermal-cool); font-size: 1.2rem; line-height: 1; margin: 5px 0;">↓</div>
+                    <div style="font-family: var(--font-code); font-size: 10px; color: #666; text-transform: uppercase; margin-bottom: 4px;">Real Application</div>
+                    <div style="font-weight: 600; color: #fff;">Automotive & MedTech</div>
+                    <ul style="margin-top: 10px; padding-left: 20px; font-size: 0.85rem; color: #999; line-height: 1.6;">
+                        <li style="margin-bottom: 8px;"><strong>Automotive:</strong> Designing AR Windshields where data must be readable without the driver losing focus on the road.</li>
+                        <li><strong>Medical Devices:</strong> Creating touchless interfaces for surgeons who need vital stats (AR overlays) without breaking sterility to touch a screen.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <section class="container">
+        <div class="spacer"></div>
+        <div style="background: #111; padding: 60px; border-radius: var(--radius); text-align: center; border: 1px solid #333;">
+            <p style="font-family:var(--font-code); font-size:0.9rem; color:var(--thermal-warm);">REFLECTION</p>
+            <h2 style="max-width:600px; margin:0 auto 30px auto;">"The constraints of an alien world taught me how to design better for this one."</h2>
+            <p style="font-size: 0.9rem; color: #666;">
+                Applying strict accessibility and hierarchy rules without color gave me a new perspective on Inclusive Design.
+            </p>
+        </div>
+        <div class="spacer"></div>
+    </section>
+
+    <footer style="text-align: center; padding-bottom: 100px; border-top: 1px solid #222; padding-top: 40px;">
+        <p style="color: #444; font-size: 14px;">Designed by EESHITVAA • 2025</p>
+    </footer>
+
+</body>
+</html>
