@@ -70,20 +70,20 @@
             display: none;
             flex-direction: column;
             justify-content: space-between;
-            width: 35px; /* Made slightly larger for easier clicking */
+            width: 35px; 
             height: 24px;
             background: transparent;
             border: none;
-            z-index: 10002; /* Very high z-index to ensure clicks work */
+            z-index: 10002; 
             cursor: pointer;
-            padding: 5px; /* Larger click area */
-            mix-blend-mode: normal; /* FIX: Force normal blend mode */
+            padding: 5px; 
+            mix-blend-mode: normal; 
         }
 
         .bar {
             width: 100%;
             height: 3px;
-            background-color: var(--ink); /* FIX: Solid black/ink color always visible */
+            background-color: var(--ink); 
             border-radius: 10px;
             transition: all 0.3s ease;
         }
@@ -108,7 +108,6 @@
             mix-blend-mode: difference; 
             color: white; 
             transition: all 0.3s ease;
-            /* Fix: Add background when mobile is open to prevent visual mess */
         }
         .top-bar.mobile-open {
             mix-blend-mode: normal;
@@ -150,7 +149,6 @@
 
         /* --- 4. HERO SECTION --- */
         .hero {
-            /* CHANGED: Added min-height to make it full screen and adjusted padding */
             min-height: 100vh; 
             padding: 120px 5vw 50px;
             
@@ -214,6 +212,7 @@
             padding: 8px 18px; border: 1.5px solid var(--ink);
             border-radius: 50px; font-size: 0.9rem; font-weight: 700;
             transition: 0.3s; background: transparent;
+            white-space: nowrap;
         }
         .tag:hover { background: var(--ink); color: var(--bg); transform: translateY(-3px); }
 
@@ -353,102 +352,146 @@
             color: #000000;
         }
         
+        .preloader {
+          position: fixed; 
+          top: 0; left: 0; 
+          width: 100%; height: 100vh;
+          background: var(--ink); 
+          z-index: 99999; 
+          display: flex; justify-content: center; align-items: center;
+          color: var(--bg); font-family: var(--font-display); font-size: 2rem;
+          transition: transform 0.8s var(--ease-out);
+        }
+        .preloader.loaded { 
+          transform: translateY(-100%); 
+        }
+
+
+        /* =========================================
+           RESPONSIVE MOBILE ADJUSTMENTS
+           ========================================= */
         @media (max-width: 900px) {
             .hero { 
                 grid-template-columns: 1fr; 
-                /* CHANGED: Adjusted padding top for mobile, kept min-height */
-                padding-top: 120px; 
-                min-height: 100vh; /* Ensure it stays full screen on mobile */
+                padding-top: 140px; 
+                gap: 40px;
+                text-align: center; /* Keeps hero items generally centered */
             }
-            .hero-visual { justify-content: center; padding-right: 0; order: -1; margin-bottom: 30px; }
+            
+            .hero-text {
+                text-align: left; /* NEW: Forces text paragraphs to the left */
+            }
+
+            .hero-visual { 
+                justify-content: center; 
+                padding-right: 0; 
+                order: -1; 
+                margin-bottom: 10px;
+            }
+            .photo-frame {
+                max-width: 240px; 
+            }
+            .sticker-tag {
+                font-size: 1rem; padding: 4px 10px;
+            }
             .cursor-circle { display: none; }
-            .chaos-section { grid-template-columns: 1fr; gap: 60px; }
-            .toolkit-item { flex-direction: column; align-items: flex-start; }
-            .polaroid-pile { height: 400px; }
+            .chaos-section { 
+                grid-template-columns: 1fr; 
+                gap: 60px; 
+            }
+            .quest-header { text-align: center; }
+            .toolkit-container h2, .quest-header h2 {
+                text-align: center; font-size: 2.5rem;
+            }
+            .polaroid-pile { height: 380px; }
             .p1 { transform: rotate(-5deg) translate(-20px, 0); }
             .p2 { transform: rotate(5deg) translate(20px, 20px); }
             .p3 { transform: rotate(0deg) translate(0, -40px); }
-
-            /* HAMBURGER RESPONSIVENESS */
+            
+            /* HAMBURGER MENU NAVIGATION */
             .hamburger { display: flex; }
             .nav-links {
                 display: none;
                 flex-direction: column;
                 justify-content: center;
                 align-items: center;
-                gap: 60px;
-
-                /* Full Screen Overlay Style */
+                gap: 40px;
                 position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100vh;
+                top: 0; left: 0; width: 100%; height: 100vh;
                 background-color: var(--bg);
-                z-index: 90; /* Below top bar (100), above content */
-
+                z-index: 90;
                 opacity: 0;
                 pointer-events: none;
                 transition: opacity 0.4s ease;
-                padding-top: 80px; /* FIX: Clear the fixed header */
             }
             .nav-links.active {
                 display: flex;
                 opacity: 1;
                 pointer-events: all;
             }
-            .nav-link {
-                font-size: 2rem;
-                font-weight: 700;
-            }
-            .nav-link.primary { border-bottom: none; }
+            .nav-link { font-size: 1.8rem; }
         }
 
+        /* =========================================
+           STRICT MOBILE TYPOGRAPHY (Smaller Letters)
+           ========================================= */
         @media (max-width: 600px) {
-            .top-bar {
-                padding: 20px 5vw 10px 5vw;
-                /* Keep flex row to keep Logo and Hamburger on same line */
-                flex-direction: row; 
-                gap: 15px;
-            }
-            .nav-links { gap: 40px; } 
-
-            /* --- UPDATED: BIGGER FOOTER TITLE --- */
-            .footer h2 {
-                font-size: 12vw; /* Increased from default 5vw */
-                line-height: 1.1;
-                margin-bottom: 30px;
-            }
+            /* Layout Spacing */
+            .top-bar { padding: 20px 5vw; }
+            .hero-title { font-size: 2.5rem; } 
+            .bio-lead { font-size: 1rem; } 
+            .bio-sub { font-size: 1rem; }
+            .cat-doodle { font-size: 1.4rem; }
             
-            /* Mobile specific tweaks for full screen hero */
-            .hero {
-                gap: 40px;
-            }
-            .hero-title {
-                font-size: 3.5rem;
-            }
-            .bio-lead {
-                font-size: 1.2rem;
-            }
-        }
-        .preloader {
-          position: fixed; 
-          top: 0; left: 0; 
-          width: 100%; height: 100vh;
-          background: var(--ink); 
-          z-index: 99999; /* Higher than everything else */
-    
-    /* Centering the text */
-          display: flex; justify-content: center; align-items: center;
-          color: var(--bg); font-family: var(--font-display); font-size: 2rem;
-    
-    /* 2. The Smooth Motion Settings */
-          transition: transform 0.8s var(--ease-out);
+            .tag { font-size: 0.8rem; padding: 6px 12px; }
+            
+            /* Spice Section */
+            .spice-section { padding: 60px 5vw; }
+            .spice-meter-title { font-size: 1.8rem; }
+            .vibe-output { font-size: 3rem; }
+            .vibe-subtitle { font-size: 1.5rem; }
+            
+            /* Chaos / Toolkit */
+            .chaos-section { padding: 80px 5vw; }
+            .toolkit-container h2 { font-size: 2rem; margin-bottom: 20px; }
+            .tool-name { font-size: 1.4rem; }
+            .tool-humor { font-size: 1.2rem; }
+            .polaroid { width: 200px; padding: 10px 10px 40px; }
+            .polaroid img { height: 200px; }
+            .polaroid-caption { font-size: 1.2rem; }
+            
+            /* Deep End */
+            .deep-end { height: 60vh; }
+            .water-text { font-size: 3.5rem; }
+            .floating-doodle { font-size: 3rem; }
+            
+            /* Footer */
+            .footer { padding: 80px 5vw; }
+            .footer h2 { font-size: 2.2rem; line-height: 1.2; } 
+            .mail-link { font-size: 1.2rem; }
         }
 
-/* 3. The Ending State (Moved up and out of view) */
-        .preloader.loaded { 
-          transform: translateY(-100%); 
+        /* =========================================
+           FIX FOR MOBILE PHOTO INTERACTION (NEW)
+           ========================================= */
+        @media (hover: none) and (pointer: coarse) {
+            /* 1. Disable the annoying hover effect on touch devices */
+            .photo-frame:hover, .photo-frame:active {
+                transform: rotate(-3deg) !important; /* Keep original rotation, ignore hover */
+            }
+            .photo-frame:hover img, .photo-frame:active img {
+                filter: grayscale(100%) !important; /* Keep it black and white */
+            }
+
+            /* 2. Add a gentle automatic floating animation instead */
+            .photo-frame {
+                animation: gentleFloat 6s ease-in-out infinite;
+            }
+
+            @keyframes gentleFloat {
+                0%, 100% { transform: rotate(-3deg) translateY(0); }
+                50% { transform: rotate(-3deg) translateY(-15px); }
+            }
         }
     </style>
 </head>
@@ -465,18 +508,18 @@
     <nav class="top-bar" id="topBar">
         <a href="index.html" class="logo interactive">eeshitvaa.design</a>
         
-        <!-- HAMBURGER ICON (Mobile Only) -->
+        <!-- HAMBURGER ICON -->
         <button class="hamburger interactive" aria-label="Menu" id="hamburgerBtn">
             <div class="bar"></div>
             <div class="bar"></div>
             <div class="bar"></div>
         </button>
 
-        <!-- LINKS (Desktop & Mobile Overlay) -->
+        <!-- LINKS -->
         <div class="nav-links" id="navLinks">
-            <a href="work.html" class="nav-link interactive primary">WORK</a>
-            <a href="about.html" class="nav-link interactive">ABOUT</a>
-            <a href="contact.html" class="nav-link interactive">CONTACT</a>
+            <a href="#work" class="nav-link interactive primary">WORK</a>
+            <a href="#about" class="nav-link interactive">ABOUT</a>
+            <a href="#contact" class="nav-link interactive">CONTACT</a>
         </div>
     </nav>
 
@@ -486,7 +529,8 @@
             <div class="hero-visual">
                 <div class="sticker-tag">Available for Snacks!</div>
                 <div class="photo-frame interactive">
-                    <img src="me.jpeg" alt="Eeshitvaa Portrait">
+                    <!-- Placeholder using Picsum with seed for consistency -->
+                    <img src="https://picsum.photos/seed/eeshitvaa/400/500" alt="Eeshitvaa Portrait">
                 </div>
             </div>
             <div class="hero-text">
@@ -548,17 +592,20 @@
                 
                 <div class="polaroid-pile">
                     <div class="polaroid p1 interactive">
-                        <img src="book.jpeg" alt="Reading">
+                        <!-- Picsum seed for book -->
+                        <img src="https://picsum.photos/seed/book/300/300" alt="Reading">
                         <div class="polaroid-caption">Escaping Reality</div>
                     </div>
                     
                     <div class="polaroid p2 interactive">
-                        <img src="soup.jpeg" alt="Soup Time">
+                        <!-- Picsum seed for soup -->
+                        <img src="https://picsum.photos/seed/soup/300/300" alt="Soup Time">
                         <div class="polaroid-caption">Professional Slurper</div>
                     </div>
 
                     <div class="polaroid p3 interactive">
-                        <img src="pottery.jpeg" alt="Pottery">
+                        <!-- Picsum seed for pottery -->
+                        <img src="https://picsum.photos/seed/pottery/300/300" alt="Pottery">
                         <div class="polaroid-caption">Playing in Mud</div>
                     </div>
                 </div>
@@ -575,7 +622,7 @@
         </section>
     </main>
 
-    <footer class="footer">
+    <footer class="footer" id="contact">
         <h2>Ready to make <br> some chaos?</h2>
         <a href="mailto:eeshitvaa@design.edu" class="mail-link interactive" class="name-red" style="font-family: var(--font-doodle); font-size: 2.5rem; z-index: 5;">eeshitvaa19@gmail.com</a>
         <div style="margin-top: 80px; opacity: 0.3; font-size: 0.8rem;">
@@ -673,7 +720,6 @@
             hamburgerBtn.classList.toggle('active');
             navLinks.classList.toggle('active');
             
-            // Toggle visual state of top bar to make links readable
             if(navLinks.classList.contains('active')) {
                 topBar.classList.add('mobile-open');
             } else {
@@ -692,3 +738,4 @@
     </script>
 </body>
 </html>
+
