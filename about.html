@@ -142,9 +142,10 @@
             position: relative;
         }
 
+        /* OVERRIDE: Make 'primary' class look exactly like others */
         .nav-link.primary {
-            font-weight: 800;
-            border-bottom: 2px solid currentColor;
+            font-weight: 500; 
+            border-bottom: none;
         }
 
         /* --- 4. HERO SECTION --- */
@@ -375,11 +376,11 @@
                 grid-template-columns: 1fr; 
                 padding-top: 140px; 
                 gap: 40px;
-                text-align: center; /* Keeps hero items generally centered */
+                text-align: center; 
             }
             
             .hero-text {
-                text-align: left; /* NEW: Forces text paragraphs to the left */
+                text-align: left; /* Text aligned left on mobile */
             }
 
             .hero-visual { 
@@ -413,11 +414,13 @@
             .nav-links {
                 display: none;
                 flex-direction: column;
-                justify-content: center;
-                align-items: center,
-                gap: 40px;
+                justify-content: center; /* Centers vertically */
+                align-items: center;     /* Centers horizontally */
+                gap: 60px;               /* Space between links */
                 position: fixed;
-                top: 0; left: 0; width: 100%; height: 100vh;
+                top: 0; left: 0; 
+                width: 100%; 
+                height: 100vh;          /* Full screen height */
                 background-color: var(--bg);
                 z-index: 90;
                 opacity: 0;
@@ -429,7 +432,7 @@
                 opacity: 1;
                 pointer-events: all;
             }
-            .nav-link { font-size: 1.8rem; }
+            .nav-link { font-size: 2rem; }
         }
 
         /* =========================================
@@ -469,6 +472,9 @@
             .footer { padding: 80px 5vw; }
             .footer h2 { font-size: 2.2rem; line-height: 1.2; } 
             .mail-link { font-size: 1.2rem; }
+            
+            /* Adjust menu link size for very small screens */
+            .nav-link { font-size: 1.8rem; }
         }
 
         /* =========================================
@@ -517,9 +523,10 @@
 
         <!-- LINKS -->
         <div class="nav-links" id="navLinks">
-            <a href="work.html" class="nav-link interactive primary">WORK</a>
-            <a href="about.html" class="nav-link interactive">ABOUT</a>
-            <a href="contact.html" class="nav-link interactive">CONTACT</a>
+            <!-- Removed 'primary' class so it looks like the others -->
+            <a href="#work" class="nav-link interactive">WORK</a>
+            <a href="#about" class="nav-link interactive">ABOUT</a>
+            <a href="#contact" class="nav-link interactive">CONTACT</a>
         </div>
     </nav>
 
@@ -529,7 +536,7 @@
             <div class="hero-visual">
                 <div class="sticker-tag">Available for Snacks!</div>
                 <div class="photo-frame interactive">
-                    <!-- Restored original image path -->
+                    <!-- Original Image Path -->
                     <img src="me.jpeg" alt="Eeshitvaa Portrait">
                 </div>
             </div>
@@ -592,19 +599,19 @@
                 
                 <div class="polaroid-pile">
                     <div class="polaroid p1 interactive">
-                        <!-- Restored original image path -->
+                        <!-- Original Image Path -->
                         <img src="book.jpeg" alt="Reading">
                         <div class="polaroid-caption">Escaping Reality</div>
                     </div>
                     
                     <div class="polaroid p2 interactive">
-                        <!-- Restored original image path -->
+                        <!-- Original Image Path -->
                         <img src="soup.jpeg" alt="Soup Time">
                         <div class="polaroid-caption">Professional Slurper</div>
                     </div>
 
                     <div class="polaroid p3 interactive">
-                        <!-- Restored original image path -->
+                        <!-- Original Image Path -->
                         <img src="pottery.jpeg" alt="Pottery">
                         <div class="polaroid-caption">Playing in Mud</div>
                     </div>
@@ -738,6 +745,7 @@
     </script>
 </body>
 </html>
+
 
 
 
