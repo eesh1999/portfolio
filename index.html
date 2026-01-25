@@ -419,7 +419,7 @@
                 <path id="circlePath" d="M 50, 50 m -37, 0 a 37,37 0 1,1 74,0 a 37,37 0 1,1 -74,0" fill="transparent" />
                 <text fill="#111">
                     <textPath xlink:href="#circlePath" class="stamp-text">
-                        AVAILABLE FOR FREELANCE • 
+                        AVAILABLE FOR FREELANCE   • 
                     </textPath>
                 </text>
             </svg>
@@ -510,37 +510,37 @@
             const mistake = "ESHITVA";
             for (let letter of mistake) {
                 textDisplay.innerText += letter;
-                await wait(80); // FASTER: was 120
+                await wait(150); // SLOWED DOWN: was 80
             }
 
-            await wait(500); // FASTER: was 800
+            await wait(1200); // SLOWED DOWN: was 500
             note.style.opacity = "1";
-            await wait(500); // FASTER: was 800
+            await wait(1200); // SLOWED DOWN: was 500
 
             // Step 2: Delete it
             note.innerText = "Wait, missing an 'E' and an 'A'...";
-            await wait(300); // FASTER: was 500
+            await wait(800); // SLOWED DOWN: was 300
             while (textDisplay.innerText.length > 0) {
                 textDisplay.innerText = textDisplay.innerText.slice(0, -1);
-                await wait(40); // FASTER: was 60
+                await wait(80); // SLOWED DOWN: was 40
             }
 
-            await wait(300); // FASTER: was 400
+            await wait(600); // SLOWED DOWN: was 300
             note.style.opacity = "0";
-            await wait(200);
+            await wait(400); // SLOWED DOWN: was 200
 
             // Step 3: Type it right
             const correct = "EESHITVAA";
             for (let letter of correct) {
                 textDisplay.innerText += letter;
-                await wait(60); // FASTER: was 90
+                await wait(120); // SLOWED DOWN: was 60
             }
 
-            await wait(300); // FASTER: was 400
+            await wait(600); // SLOWED DOWN: was 300
             textDisplay.style.color = "#FF3B30";
             note.innerText = "There we go. Much better.";
             note.style.opacity = "1";
-            await wait(800); // FASTER: was 1200
+            await wait(1500); // SLOWED DOWN: was 800
 
             // Step 4: Slide away
             introOverlay.style.transform = "translateY(-100%)";
@@ -548,7 +548,7 @@
             
             setTimeout(() => {
                 introOverlay.style.display = "none";
-            }, 600); // FASTER: was 1000
+            }, 1000); // SLOWED DOWN: was 600
         }
 
         window.addEventListener('DOMContentLoaded', playIntro);
@@ -609,3 +609,4 @@
     </script>
 </body>
 </html>
+
