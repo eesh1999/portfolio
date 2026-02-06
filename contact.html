@@ -192,7 +192,7 @@
             font-family: var(--font-body); font-size: 1rem; font-weight: 700;
             border-radius: 50px; border: none; z-index: 50; white-space: nowrap;
             position: absolute; 
-            top: 60%; 
+            top: 70%; /* Desktop Position */
             left: 50%; 
             transform: translate(-50%, -50%); 
             transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
@@ -205,13 +205,21 @@
         }
         
         .scroll-link {
-            font-family: var(--font-doodle); font-size: 1.4rem; color: var(--ink);
+            font-family: var(--font-doodle); font-size: 1.8rem; 
+            color: var(--ink);
             position: absolute; 
-            bottom: 8%; 
+            bottom: auto; 
+            top: 82%; 
             transform: rotate(-3deg);
-            transition: 0.3s; cursor: pointer; z-index: 60; text-align: center; width: 100%;
-            opacity: 0.6;
+            transition: 0.4s ease; cursor: pointer; z-index: 60; text-align: center; width: 100%;
+            opacity: 0; /* Hidden initially */
+            pointer-events: none; /* Prevent clicking hidden text */
         }
+        .scroll-link.visible {
+            opacity: 0.8; /* Visible state */
+            pointer-events: all; /* Allow clicking */
+        }
+        
         .scroll-link:hover { transform: rotate(0deg) scale(1.05); color: var(--btn-color); opacity: 1; }
         
         .scroll-arrow {
@@ -400,7 +408,7 @@
             .runaway-btn { 
                 /* Force absolute positioning so it can run anywhere */
                 position: absolute !important;
-                top: 50%; 
+                top: 55%; /* CHANGED: Higher (was 65%) */
                 left: 50%; 
                 transform: translate(-50%, -50%);
                 
@@ -414,7 +422,15 @@
                 background-color: var(--ink) !important;
             }
 
-            .scroll-link { position: relative; bottom: auto; margin-top: 60px; font-size: 1.2rem; }
+            .scroll-link { 
+                position: relative; 
+                bottom: auto; 
+                margin-top: 0; /* Reset margin since using absolute top */
+                top: 85%; /* Position above button */
+                font-size: 1.4rem; 
+                transform: rotate(-3deg);
+                width: 100%;
+            }
 
             .real-contact { gap: 40px; padding: 60px 20px; }
             .form-paper { padding: 30px 20px; }
@@ -554,7 +570,7 @@
         const navItems = document.querySelectorAll('.nav-item');
 
         hamburger.addEventListener('click', () => {
-            // Toggle the 'active' class
+            // Toggle 'active' class
             hamburger.classList.toggle('active');
             navLinks.classList.toggle('active');
         });
@@ -571,6 +587,7 @@
         // RUNAWAY BUTTON LOGIC
         const btn = document.getElementById('runawayBtn');
         const container = document.getElementById('hero-area');
+        const textLink = document.querySelector('.scroll-link'); // Selects "Just kidding" text
         let isButtonCaught = false; 
 
         // Helper function to move button randomly
@@ -594,12 +611,15 @@
             btn.style.top = `${randomY}px`;
             btn.style.left = `${randomX}px`;
             
-            // Reset transform to center on the new coordinates
+            // Reset transform to center on new coordinates
             btn.style.transform = "translate(-50%, -50%)";
             
             // Add a slight rotation for chaos
             const randomRotation = (Math.random() - 0.5) * 20; 
             btn.style.transform += ` rotate(${randomRotation}deg)`;
+
+            // REVEAL TEXT: Add class to show text after button runs
+            textLink.classList.add('visible');
         }
 
         // --- DESKTOP LOGIC ---
@@ -627,23 +647,26 @@
                 });
             });
 
-            // Reset if mouse leaves the hero area
+            // Reset if mouse leaves hero area
             container.addEventListener('mouseleave', () => {
                 if (!isButtonCaught) {
-                    btn.style.top = "60%";
+                    btn.style.top = "70%"; // Desktop reset
                     btn.style.left = "50%";
                     btn.style.transform = "translate(-50%, -50%) rotate(0deg)";
                     btn.innerText = "YES, DO IT NOW";
+                    
+                    // RESET TEXT: Hide text again when leaving section
+                    textLink.classList.remove('visible');
                 }
             });
 
         } else { 
             // --- MOBILE RUNAWAY LOGIC ---
             // Mobile uses 'click' because there is no 'mouseover'.
-            // We prevent the default click action so it moves instead of scrolling immediately.
+            // We prevent default click action so it moves instead of scrolling immediately.
             
             btn.addEventListener('click', (event) => {
-                // Prevent the click from registering (so it doesn't scroll)
+                // Prevent click from registering (so it doesn't scroll)
                 event.preventDefault(); 
                 
                 // Move the button
@@ -663,3 +686,4 @@
 </body>
 
 </html>
+
