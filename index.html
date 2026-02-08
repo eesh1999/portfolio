@@ -26,26 +26,29 @@
         }
 
         .typing-container {
-            height: 15vw;
+            height: 15vw; /* Responsive height */
+            max-height: 100px; /* Slightly reduced max height */
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            padding: 0 20px;
         }
 
         #typewriter-text {
             font-family: 'Syne', sans-serif;
             font-weight: 800;
-            font-size: clamp(2.5rem, 10vw, 8rem);
+            font-size: clamp(2.5rem, 12vw, 8rem);
             color: #111111;
             text-transform: uppercase;
             letter-spacing: -2px;
+            line-height: 1;
         }
 
         .custom-cursor {
             display: inline-block;
             width: 10px;
-            height: clamp(2.5rem, 10vw, 6rem);
+            height: clamp(2.5rem, 12vw, 6rem);
             background-color: #FF3B30;
             margin-left: 10px;
             animation: blink 0.6s infinite;
@@ -54,13 +57,37 @@
 
         #designer-note {
             font-family: 'Reenie Beanie', cursive;
-            font-size: 2rem;
+            font-size: 1.5rem;
             color: #FF3B30;
             margin-top: 20px;
             height: 30px;
             opacity: 0;
             transform: rotate(-3deg);
             transition: opacity 0.3s ease;
+        }
+
+        /* SKIP BUTTON STYLE */
+        .skip-button {
+            position: absolute;
+            bottom: 40px;
+            right: 40px;
+            background: transparent;
+            border: 1px solid rgba(17, 17, 17, 0.3);
+            padding: 12px 20px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            z-index: 100000;
+            transition: all 0.3s ease;
+            opacity: 0.6;
+        }
+        .skip-button:hover {
+            opacity: 1;
+            border-color: #111;
+            background: #111;
+            color: #F4F2EE;
         }
 
         @keyframes blink { 50% { opacity: 0; } }
@@ -76,7 +103,7 @@
             --font-doodle: 'Reenie Beanie', cursive;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; cursor: none; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             background-color: var(--bg);
@@ -84,9 +111,13 @@
             font-family: var(--font-body);
             overflow-x: hidden;
             width: 100%;
+            cursor: auto;
         }
 
-        /* Prevent scroll during intro */
+        @media (hover: hover) and (pointer: fine) {
+            body { cursor: none; }
+        }
+
         body.intro-running { overflow: hidden; }
 
         a { text-decoration: none; color: inherit; }
@@ -108,7 +139,7 @@
                 transform: translate(-50%, -50%);
                 border-radius: 50%;
                 pointer-events: none;
-                z-index: 10000;
+                z-index: 1000001; /* CHANGED: Increased to sit above intro */
                 width: 8px; height: 8px; background: var(--ink);
             }
             .cursor-circle {
@@ -116,7 +147,7 @@
                 transform: translate(-50%, -50%);
                 border-radius: 50%;
                 pointer-events: none;
-                z-index: 10000;
+                z-index: 1000001; /* CHANGED: Increased to sit above intro */
                 width: 40px; height: 40px;
                 border: 1px solid var(--ink);
                 transition: width 0.3s, height 0.3s, background-color 0.3s;
@@ -148,9 +179,12 @@
             display: inline-block;
             transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
-        .hero-title span:hover {
-            transform: translateY(-15px) rotate(2deg);
-            color: var(--accent);
+        
+        @media (hover: hover) {
+            .hero-title span:hover {
+                transform: translateY(-15px) rotate(2deg);
+                color: var(--accent);
+            }
         }
 
         .doodle-text {
@@ -181,16 +215,21 @@
         .logo { font-weight: 700; font-size: 1.5rem; letter-spacing: -1px; z-index: 101; }
         
         .nav-links { display: flex; gap: 40px; z-index: 101; }
+        
         .nav-item { 
             position: relative; overflow: hidden; 
-            font-size: 1rem; text-transform: uppercase; font-weight: 500;
+            font-size: 1rem; text-transform: uppercase; 
+            font-weight: 700;
             display: inline-block;
+            border-bottom: 1px solid var(--ink);
+            opacity: 0.8;
+            transition: all 0.3s;
         }
-        .nav-item::after {
-            content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 2px;
-            background: var(--accent); transform: translateX(-101%); transition: 0.3s;
+        .nav-item:hover { 
+            opacity: 1; 
+            border-bottom: 1px solid var(--accent); 
+            color: var(--accent); 
         }
-        .nav-item:hover::after { transform: translateX(0); }
 
         .hero-content {
             display: grid;
@@ -200,10 +239,14 @@
         }
 
         .role-descriptor {
-            margin-top: 30px; 
+            margin-top: 20px; 
             font-size: 1.5rem;
             max-width: 600px;
             line-height: 1.4;
+        }
+
+        .emphasis-bold {
+            font-weight: 700;
         }
 
         .stamp-badge {
@@ -214,7 +257,14 @@
             z-index: 5;
             pointer-events: none; 
         }
-        .stamp-text { font-family: var(--font-body); font-size: 12px; text-transform: uppercase; letter-spacing: 2px; font-weight: 700; }
+        
+        .stamp-text { 
+            font-family: var(--font-body); 
+            font-size: 12px; 
+            text-transform: none; 
+            letter-spacing: 1px; 
+            font-weight: 700; 
+        }
 
         .section-work {
             padding: 0 5vw 100px 5vw; 
@@ -222,13 +272,23 @@
         }
 
         .section-header {
-            display: flex; justify-content: space-between; align-items: flex-end;
+            display: flex; flex-direction: column; 
+            justify-content: flex-start;
+            align-items: flex-start;
             margin-bottom: 60px;
         }
         
         .section-header h2 {
             font-family: var(--font-display); font-weight: 800; line-height: 0.9;
             font-size: clamp(3rem, 6vw, 5rem); 
+        }
+        
+        .section-subtitle {
+            font-family: var(--font-body);
+            font-size: 1rem;
+            opacity: 0.5;
+            margin-top: 10px;
+            font-weight: 400;
         }
 
         .project-grid {
@@ -271,10 +331,6 @@
             border-bottom: 1px solid var(--ink);
         }
         
-        /* 
-           --- UPDATED: IMAGE STYLES FOR CARDS 
-           Using img instead of SVG shapes.
-        */
         .card-image img {
             width: 100%; 
             height: 100%; 
@@ -303,6 +359,7 @@
 
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
+        /* Hamburger Menu Styles */
         .hamburger {
             display: none;
             flex-direction: column;
@@ -327,58 +384,251 @@
         .hamburger.active .bar:nth-child(2) { opacity: 0; }
         .hamburger.active .bar:nth-child(3) { transform: rotate(-45deg) translate(5px, -6px); }
 
+        /* --- WOW FACTOR: DIMENSIONAL PORTAL STYLES --- */
+        #portal-container {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        #portal-container.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .portal-mask {
+            position: absolute;
+            inset: 0;
+            background: var(--ink);
+            clip-path: circle(0px at 50% 50%);
+            transition: clip-path 0.1s ease-out;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .portal-content {
+            width: 100vw;
+            height: 100vh;
+            background-color: #FF3B30;
+            background-image: var(--paper-grain);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: white;
+            padding: 20px;
+        }
+
+        .portal-photo {
+            width: 40vh;
+            height: 50vh;
+            object-fit: cover;
+            border: 10px solid white;
+            transform: rotate(-3deg);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            margin-bottom: 20px;
+        }
+
+        .portal-text {
+            font-family: var(--font-display);
+            font-size: 5vw;
+            font-weight: 900;
+            text-transform: uppercase;
+            line-height: 0.8;
+        }
+
+        .portal-hint {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: var(--font-doodle);
+            font-size: 2rem;
+            color: white;
+        }
+
+        /* =========================================
+           RESPONSIVE MEDIA QUERIES
+           ========================================= */
+        
+        /* Tablet & Small Desktop (max-width: 900px) */
         @media (max-width: 900px) {
-            .hero-content { grid-template-columns: 1fr; margin-top: 0; }
-            .project-grid { grid-template-columns: 1fr; gap: 80px; }
-            .hero-title { white-space: nowrap; font-size: 15vw; line-height: 1.0; margin-left: 0; margin-top: -60px; }
-            .role-descriptor { font-size: 1.1rem; max-width: 100%; margin-top: 70px; }
+            .hero-content { 
+                grid-template-columns: 1fr; 
+                margin-top: 0; 
+            }
+            
+            .project-grid { 
+                grid-template-columns: 1fr; 
+                gap: 80px; 
+            }
+            
+            .hero-title { 
+                white-space: nowrap; 
+                font-size: 15vw; 
+                line-height: 1.0; 
+                margin-left: 0; 
+                margin-top: -40px; 
+            }
+            
+            .role-descriptor { 
+                font-size: 1.1rem; 
+                max-width: 100%; 
+                margin-top: 40px; 
+            }
+            
             .project-card { height: 500px; }
-            .stamp-badge { opacity: 0.15; right: -30px; top: 120px; width: 100px; height: 100px; }
-            .hero { padding-bottom: 40px; min-height: auto; padding-top: 160px; } 
+            
+            .stamp-badge { 
+                opacity: 0.15; 
+                right: -30px; 
+                top: 120px; 
+                width: 100px; 
+                height: 100px; 
+            }
+            
+            .hero { 
+                padding-bottom: 40px; 
+                min-height: auto; 
+                padding-top: 160px; 
+            } 
+            
             .section-work { padding-top: 40px; }
         }
 
+        /* Mobile (max-width: 600px) */
         @media (max-width: 600px) {
-            .top-bar { padding: 30px 5vw; }
+            /* Nav & Menu */
+            .top-bar { padding: 25px 5vw; }
+            
             .hamburger { display: flex; }
-            .logo { font-size: 1.2rem; }
+            
             .nav-links {
-                display: none;
+                display: flex; 
                 flex-direction: column;
                 justify-content: center;
                 align-items: center;
-                gap: 60px;
+                gap: 50px;
                 position: fixed;
-                top: 0; left: 0; width: 100%; height: 100vh;
+                top: 0; left: 0; 
+                width: 100%; 
+                height: 100vh;
                 background-color: var(--bg);
-                z-index: 90; 
+                z-index: 100; 
                 opacity: 0;
                 pointer-events: none;
                 transition: opacity 0.4s ease;
+                backdrop-filter: blur(5px);
             }
-            .nav-links.active { display: flex; opacity: 1; pointer-events: all; }
-            .nav-item { font-size: 2rem; font-weight: 700; }
-            .section-header h2 { font-size: 2.5rem; }
-            .card-title { font-size: 1.8rem; }
-            .footer h2 { font-size: 11vw !important; line-height: 1.1; } 
-            .hero-title { margin-top: -40px; }
-            .role-descriptor { margin-top: 60px; } 
             
-            /* RESPONSIVE: Make Text Significantly Smaller */
+            .nav-links.active { 
+                opacity: 1; 
+                pointer-events: all; 
+            }
+            
+            .nav-item { 
+                font-size: 2rem; 
+                font-weight: 700; 
+                border-bottom: none; 
+            }
+            .nav-item:hover {
+                color: var(--accent);
+                transform: scale(1.05);
+            }
+
+            /* Typography */
+            .logo { font-size: 1.2rem; }
+            
+            /* CHANGE: Selected Work Size Reduced */
+            .section-header h2 { 
+                font-size: 2rem; /* Reduced from 2.5rem */
+            }
+            
+            .section-subtitle {
+                font-size: 0.9rem;
+            }
+
+            .card-title { font-size: 1.8rem; }
+            
+            .footer h2 { 
+                font-size: 11vw !important; 
+                line-height: 1.1; 
+            }
+
+            /* CHANGE: Mobile Hero Title Bigger Size & Moved Up */
+            .hero-title { 
+                margin-top: -80px; /* Kept upward position */
+                font-size: 14vw; /* Bigger size */
+            }
+
+            .role-descriptor { 
+                margin-top: 30px; 
+            } 
+            
             .role-descriptor {
-                font-size: 0.85rem !important; /* Reduced drastically */
-                margin-top: 20px;
+                font-size: 1rem; 
             }
+            
             .role-descriptor p {
-                line-height: 1.7; /* Increased line height for readability */
+                line-height: 1.6; 
             }
-
             .role-descriptor p:last-child {
-                font-size: 0.8rem !important; /* Extra small for long text */
+                font-size: 0.9rem; 
+            }
+            .role-descriptor .doodle-text {
+                font-size: 1.5rem !important;
             }
 
-            .role-descriptor .doodle-text {
-                font-size: 1rem !important;
+            #typewriter-text {
+                font-size: clamp(2rem, 11vw, 5rem); 
+            }
+            
+            #designer-note {
+                font-size: 1.2rem;
+            }
+            
+            .custom-cursor {
+                height: clamp(2rem, 11vw, 5rem); 
+            }
+
+            .skip-button { 
+                right: 20px; 
+                bottom: 20px; 
+                font-size: 0.7rem;
+                padding: 10px 15px;
+            }
+
+            /* Portal Adjustments */
+            .portal-photo { 
+                width: 70vw; 
+                height: 40vh; 
+                border-width: 5px;
+            }
+            
+            .portal-text { 
+                font-size: 10vw; 
+            }
+            
+            .portal-hint {
+                font-size: 1.5rem;
+                bottom: 30px;
+                width: 100%;
+            }
+        }
+
+        /* Very Small Mobile (max-width: 350px) */
+        @media (max-width: 350px) {
+            .hero-title {
+                font-size: 13vw; 
+            }
+            .nav-item {
+                font-size: 1.5rem;
             }
         }
     </style>
@@ -387,11 +637,26 @@
 
     <!-- INTRO OVERLAY -->
     <div id="story-intro">
+        <button class="skip-button interactive" id="skip-intro">Skip Intro</button>
+        
         <div class="typing-container">
             <div>
                 <span id="typewriter-text"></span><span class="custom-cursor"></span>
             </div>
             <p id="designer-note">Wait... spelling check?</p>
+        </div>
+    </div>
+
+    <!-- DIMENSIONAL PORTAL (THE WOW FACTOR) -->
+    <div id="portal-container">
+        <div class="portal-mask" id="portal-mask">
+            <div class="portal-content">
+                <img src="https://images.unsplash.com/photo-1554151228-14d9def656e4?q=80&w=1000&auto=format&fit=crop" class="portal-photo" alt="Creative Mind">
+                <div class="portal-text">
+                    Curiosity <br> Over <br> Comfort.
+                </div>
+                <div class="portal-hint">Click anywhere to return...</div>
+            </div>
         </div>
     </div>
 
@@ -419,7 +684,7 @@
                 <path id="circlePath" d="M 50, 50 m -37, 0 a 37,37 0 1,1 74,0 a 37,37 0 1,1 -74,0" fill="transparent" />
                 <text fill="#111">
                     <textPath xlink:href="#circlePath" class="stamp-text">
-                        AVAILABLE FOR FREELANCE   • 
+                        Available  For   Freelance   
                     </textPath>
                 </text>
             </svg>
@@ -427,7 +692,7 @@
 
         <div class="hero-content">
             <div>
-                <h1 class="hero-title interactive" aria-label="Eeshitvaa">
+                <h1 class="hero-title interactive" id="portal-trigger" aria-label="Eeshitvaa">
                     <span aria-hidden="true">E</span><span aria-hidden="true">E</span><span aria-hidden="true">S</span><span aria-hidden="true">H</span><span aria-hidden="true">I</span><br>
                     <span aria-hidden="true">T</span><span aria-hidden="true">V</span><span aria-hidden="true">A</span><span aria-hidden="true">A</span><span style="color:var(--accent)" aria-hidden="true">.</span>
                 </h1>
@@ -436,9 +701,9 @@
                     <p style="margin-bottom: 20px;">
                         <span class="doodle-text" style="position:relative; top: -5px; transform: rotate(-5deg); display:inline-block;" aria-hidden="true">Hello!</span> 
                         <span class="sr-only">Hello!</span>
-                        I’m a Product Designer crafting <span style="border-bottom: 2px solid var(--accent);">intuitive</span> systems with a touch of chaos.
+                        I’m a <span class="emphasis-bold">Product Designer</span> crafting <span style="border-bottom: 2px solid var(--accent);">intuitive</span> systems with a touch of chaos.
                     </p>
-                    <p style="font-size: 1rem; opacity: 0.7; max-width: 450px; line-height: 1.6; font-family: var(--font-body);">
+                    <p style="font-size: 1rem; opacity: 0.85; max-width: 450px; line-height: 1.6; font-family: var(--font-body);">
                         Specializing in UI Motion, Design Systems, and Brand Identity. Currently building digital dreams in India...
                     </p>
                 </div>
@@ -448,37 +713,33 @@
 
     <section class="section-work">
         <div class="section-header">
-            <h2>SELECTED <br> WORKS </h2>
-            <div class="doodle-text" style="transform: rotate(5deg); font-size: 1.8rem;" aria-hidden="true">Recent obsessions -></div>
+            <h2>SELECTED <br> WORK</h2>
+            <div class="section-subtitle">A few projects I'm proud of</div>
         </div>
 
         <div class="project-grid">
-            <!-- PROJECT 1 -->
             <a href="careerexpo.html" class="project-card interactive" aria-label="View Project: Sandbox">
                 <div class="card-inner">
                     <div class="card-image">
-                        <!-- REPLACED SVG WITH IMAGE -->
                         <img src="careerexpo1.jpg" alt="Sandbox Project UI Interface">
                     </div>
                     <div class="card-info">
                         <div class="card-tags">Phygital • Mobile App</div>
                         <h3 class="card-title">Sandbox</h3>
-                        <p style="opacity: 0.7;">Redefining trust in career choices.</p>
+                        <p style="opacity: 0.85;">Redefining trust in career choices.</p>
                     </div>
                 </div>
             </a>
 
-            <!-- PROJECT 2 -->
             <a href="style.html" class="project-card interactive" style="margin-top: 100px;" aria-label="View Project: Vortex">
                 <div class="card-inner">
                     <div class="card-image">
-                        <!-- REPLACED SVG WITH IMAGE -->
-                        <img src="style4 (1).png" alt="StylePrism Fashion App Interface">
+                        <img src="style4 (1).png"StylePrism Fashion App Interface">
                     </div>
                     <div class="card-info">
                         <div class="card-tags">Fashion UI • Mobile App</div>
                         <h3 class="card-title">StylePrism</h3>
-                        <p style="opacity: 0.7;">AI-powered wardrobe organizer for weather and mood.</p>
+                        <p style="opacity: 0.85;">AI-powered wardrobe organizer for weather and mood.</p>
                     </div>
                 </div>
             </a>
@@ -488,7 +749,7 @@
     <footer class="footer">
         <h2 style="font-family: var(--font-display); font-weight: 800; font-size: 5vw; margin-bottom: 20px;">LET'S BUILD <br> THE FUTURE.</h2>
         <a href="mailto:eeshitvaa19@gmail.com" class="doodle-text" style="color: #FF3B30; font-size: 2.5rem; cursor: pointer;">eeshitvaa19@gmail.com</a>
-        <div style="margin-top: 80px; opacity: 0.4; font-size: 0.8rem;">
+        <div style="margin-top: 80px; opacity: 0.6; font-size: 0.8rem;">
             © 2025 Eeshitvaa. Built with too much coffee.
         </div>
     </footer>
@@ -502,58 +763,91 @@
         const textDisplay = document.getElementById('typewriter-text');
         const note = document.getElementById('designer-note');
         const introOverlay = document.getElementById('story-intro');
+        const skipBtn = document.getElementById('skip-intro');
+        let introSkipped = false;
 
         const wait = (ms) => new Promise(res => setTimeout(res, ms));
 
+        function endIntro() {
+            introSkipped = true;
+            introOverlay.style.transform = "translateY(-100%)";
+            document.body.classList.remove('intro-running');
+            setTimeout(() => { introOverlay.style.display = "none"; }, 1000);
+        }
+
+        skipBtn.addEventListener('click', endIntro);
+
         async function playIntro() {
-            // Step 1: Type wrong spelling
+            if (introSkipped) return;
+
             const mistake = "ESHITVA";
             for (let letter of mistake) {
+                if (introSkipped) return;
                 textDisplay.innerText += letter;
-                await wait(150); // SLOWED DOWN: was 80
+                await wait(150);
             }
-
-            await wait(1200); // SLOWED DOWN: was 500
+            await wait(1200);
+            if (introSkipped) return;
             note.style.opacity = "1";
-            await wait(1200); // SLOWED DOWN: was 500
-
-            // Step 2: Delete it
+            await wait(1200);
+            if (introSkipped) return;
             note.innerText = "Wait, missing an 'E' and an 'A'...";
-            await wait(800); // SLOWED DOWN: was 300
+            await wait(800);
             while (textDisplay.innerText.length > 0) {
+                if (introSkipped) return;
                 textDisplay.innerText = textDisplay.innerText.slice(0, -1);
-                await wait(80); // SLOWED DOWN: was 40
+                await wait(80);
             }
-
-            await wait(600); // SLOWED DOWN: was 300
+            await wait(600);
+            if (introSkipped) return;
             note.style.opacity = "0";
-            await wait(400); // SLOWED DOWN: was 200
-
-            // Step 3: Type it right
+            await wait(400);
             const correct = "EESHITVAA";
             for (let letter of correct) {
+                if (introSkipped) return;
                 textDisplay.innerText += letter;
-                await wait(120); // SLOWED DOWN: was 60
+                await wait(120);
             }
-
-            await wait(600); // SLOWED DOWN: was 300
+            await wait(600);
+            if (introSkipped) return;
             textDisplay.style.color = "#FF3B30";
             note.innerText = "There we go. Much better.";
             note.style.opacity = "1";
-            await wait(1500); // SLOWED DOWN: was 800
-
-            // Step 4: Slide away
-            introOverlay.style.transform = "translateY(-100%)";
-            document.body.classList.remove('intro-running');
+            await wait(1500);
             
-            setTimeout(() => {
-                introOverlay.style.display = "none";
-            }, 1000); // SLOWED DOWN: was 600
+            if (!introSkipped) endIntro();
         }
 
         window.addEventListener('DOMContentLoaded', playIntro);
 
-        /* --- ORIGINAL PORTFOLIO SCRIPTS --- */
+        /* --- PORTAL SCRIPT --- */
+        const portalTrigger = document.getElementById('portal-trigger');
+        const portalContainer = document.getElementById('portal-container');
+        const portalMask = document.getElementById('portal-mask');
+        let portalActive = false;
+        let portalRadius = 0;
+
+        portalTrigger.addEventListener('click', (e) => {
+            portalActive = true;
+            portalContainer.classList.add('active');
+            let val = 0;
+            const openInt = setInterval(() => {
+                val += 15;
+                portalRadius = val;
+                if (val >= 250) clearInterval(openInt);
+            }, 10);
+        });
+
+        portalContainer.addEventListener('click', () => {
+            portalActive = false;
+            portalRadius = 0;
+            portalMask.style.clipPath = `circle(0px at 50% 50%)`;
+            setTimeout(() => {
+                portalContainer.classList.remove('active');
+            }, 300);
+        });
+
+        /* --- CURSOR SCRIPT --- */
         const dot = document.querySelector('.cursor-dot');
         const circle = document.querySelector('.cursor-circle');
         let mx = 0, my = 0, cx = 0, cy = 0;
@@ -561,8 +855,18 @@
         document.addEventListener('mousemove', e => { 
             mx = e.clientX; my = e.clientY; 
             if(dot) { dot.style.left = `${mx}px`; dot.style.top = `${my}px`; }
+            if(portalActive) {
+                portalMask.style.clipPath = `circle(${portalRadius}px at ${mx}px ${my}px)`;
+            }
         });
         
+        document.addEventListener('touchmove', e => {
+             if(portalActive) {
+                const touch = e.touches[0];
+                portalMask.style.clipPath = `circle(${portalRadius}px at ${touch.clientX}px ${touch.clientY}px)`;
+             }
+        }, {passive: true});
+
         function anim() { 
             cx += (mx - cx) * 0.1; cy += (my - cy) * 0.1; 
             if(circle) { circle.style.left = `${cx}px`; circle.style.top = `${cy}px`; }
@@ -573,6 +877,8 @@
         document.querySelectorAll('.interactive').forEach(el => {
             el.addEventListener('mouseenter', () => document.body.classList.add('hovering'));
             el.addEventListener('mouseleave', () => document.body.classList.remove('hovering'));
+            el.addEventListener('touchstart', () => document.body.classList.add('hovering'));
+            el.addEventListener('touchend', () => document.body.classList.remove('hovering'));
         });
 
         if (window.matchMedia("(hover: hover)").matches) {
@@ -583,30 +889,29 @@
                     const y = ((e.clientY - r.top) / r.height - 0.5) * -15;
                     card.querySelector('.card-inner').style.transform = `rotateX(${y}deg) rotateY(${x}deg) scale(1.02)`;
                 });
-                card.addEventListener('mouseleave', () => card.querySelector('.card-inner').style.transform = `rotateX(0) rotateY(0) scale(1)`);
+                card.addEventListener('mouseleave', () => {
+                    const inner = card.querySelector('.card-inner');
+                    if(inner) inner.style.transform = `rotateX(0) rotateY(0) scale(1)`;
+                });
             });
         }
 
         const hamburger = document.querySelector('.hamburger');
         const navLinks = document.querySelector('.nav-links');
         
-        // Toggle Menu
         hamburger.addEventListener('click', () => {
             hamburger.classList.toggle('active');
             navLinks.classList.toggle('active');
         });
 
-        // RESPONSIVE: Close menu when clicking a link
         document.querySelectorAll('.nav-item').forEach(link => {
             link.addEventListener('click', () => {
-                // Only close if screen width is mobile
-                if (window.innerWidth <= 600) {
-                    hamburger.classList.remove('active');
-                    navLinks.classList.remove('active');
-                }
+                hamburger.classList.remove('active');
+                navLinks.classList.remove('active');
             });
         });
     </script>
 </body>
 </html>
+
 
