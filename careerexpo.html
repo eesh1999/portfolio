@@ -1,951 +1,1067 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sandbox Semester | UX Case Study</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareerExpo | A UX Journey by Eeshitvaa</title>
 
-<!-- FONTS -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Manrope:wght@400;500;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <!-- 
+        --- EXTERNAL ASSETS ---
+        Fonts: Manrope for heavy headers, Inter for accessible body, Space Grotesk for technical data.
+    -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Manrope:wght@700;800&family=Space+Grotesk:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- 
+        --- CORE LIBRARIES ---
+        Three.js: For 3D Mustard Cube engine.
+        GSAP: For high-performance motion graphics and scroll triggers.
+        Lenis: For smooth scrollytelling momentum.
+    -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- ADDED: Utility for Rounded Geometry -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/geometries/RoundedBoxGeometry.js"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.19/bundled/lenis.min.js"></script>
 
-<style>
-/* --- 1. DESIGN TOKENS --- */
-:root {
-/* Backgrounds */
---bg-page: #FAFAFA;
---bg-card: #FFFFFF;
---bg-dark: #0F0F0F;
+    <style>
+        /* 
+           --- 1. DESIGN SYSTEM: TOKENS & VARIABLES ---
+           Based on "Construction Chic" Principles. 
+           Mustard represents "Work in Progress" and "Safety."
+        */
+        :root {
+            /* Background System */
+            --bg-dark: #050505;
+            --bg-card: #0F0F0F;
+            --bg-elevated: #161616;
+            
+            /* The Mustard Spectrum */
+            --mustard: #FFD60A; 
+            --mustard-dim: #967200;
+            --mustard-glass: rgba(255, 214, 10, 0.1);
+            --mustard-border: rgba(255, 214, 10, 0.3);
+            
+            /* Status Colors */
+            --error-red: #FF4444;
+            --success-green: #00FF66;
+            --ai-blue: #0A84FF;
+            
+            /* Ink & Typography */
+            --ink-high: #FFFFFF;
+            --ink-mid: #A0A0A0;
+            --ink-low: #555555;
+            
+            /* Borders & Glassmorphism */
+            --border-subtle: rgba(255, 255, 255, 0.08);
+            --border-bold: rgba(255, 255, 255, 0.15);
+            
+            /* Font Definitions */
+            --font-head: 'Manrope', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --font-mono: 'Space Grotesk', sans-serif;
+            
+            /* Motion Presets */
+            --ease: cubic-bezier(0.19, 1, 0.22, 1);
+            --section-gap: 200px;
+        }
 
-/* Typography */
---ink-primary: #111111;
---ink-secondary: #555555;
---ink-tertiary: #888888;
+        /* --- GLOBAL RESET & SMOOTHING --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+        
+        body {
+            background-color: var(--bg-dark);
+            color: var(--ink-high);
+            font-family: var(--font-body);
+            line-height: 1.65;
+            overflow-x: hidden;
+            cursor: none; /* Hide default for custom cursor */
+        }
 
-/* Accents */
---mustard: #FFD60A;
---mustard-text: #967200;
---mustard-light: #FFF9DB;
+        /* --- 3D MUSTARD ENGINE CANVAS --- */
+        #cube-canvas {
+            position: fixed; top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            pointer-events: none; z-index: 1;
+            opacity: 0.8;
+        }
 
-/* Fonts */
---font-head: 'Manrope', sans-serif;
---font-body: 'Inter', sans-serif;
---font-brand: 'Space Grotesk', sans-serif;
+        /* --- CUSTOM KINETIC CURSOR --- */
+        #cursor-ball {
+            position: fixed; width: 10px; height: 10px; background: var(--mustard);
+            border-radius: 50%; pointer-events: none; z-index: 9999;
+        }
+        #cursor-outline {
+            position: fixed; width: 44px; height: 44px; border: 1px solid var(--mustard);
+            border-radius: 50%; pointer-events: none; z-index: 9998;
+            transition: transform 0.15s var(--ease);
+        }
 
-/* Spacing */
---spacing-section: 160px;
---radius: 16px;
---spacing-lg: clamp(80px, 10vw, 160px);
---spacing-md: clamp(40px, 5vw, 80px);
---container-pad: clamp(20px, 5vw, 50px);
-}
+        /* --- NAVIGATION: BLURRED MINIMALISM --- */
+        nav {
+            position: fixed; top: 0; width: 100%; padding: 30px 60px;
+            display: flex; justify-content: space-between; align-items: center;
+            z-index: 1000; background: linear-gradient(to bottom, rgba(5,5,5,1), transparent);
+            backdrop-filter: blur(12px); border-bottom: 1px solid var(--border-subtle);
+        }
+        .nav-logo { font-family: var(--font-mono); font-weight: 700; font-size: 24px; color: #fff; text-decoration: none; }
+        .nav-logo span { color: var(--mustard); }
+        .nav-links { display: flex; gap: 40px; list-style: none; }
+        .nav-links a { 
+            color: var(--ink-mid); text-decoration: none; font-family: var(--font-mono); 
+            font-size: 11px; text-transform: uppercase; letter-spacing: 2px; transition: 0.3s;
+        }
+        .nav-links a:hover { color: var(--mustard); }
 
-/* RESET */
-* { margin: 0; padding: 0; box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+        /* --- LAYOUT ARCHITECTURE --- */
+        .container { max-width: 1400px; margin: 0 auto; padding: 0 60px; position: relative; z-index: 10; }
+        .spacer { height: var(--section-gap); }
+        .tag-mono {
+            font-family: var(--font-mono); font-size: 13px; text-transform: uppercase;
+            color: var(--mustard); letter-spacing: 3px; margin-bottom: 24px; display: block;
+        }
+        h1.display { font-family: var(--font-head); font-weight: 800; font-size: clamp(3.5rem, 10vw, 8.5rem); line-height: 0.85; letter-spacing: -0.06em; }
+        h2.headline { font-family: var(--font-head); font-weight: 800; font-size: clamp(2.2rem, 5vw, 4rem); line-height: 1.1; letter-spacing: -0.04em; margin-bottom: 40px; }
+        p.lead { font-size: clamp(1.1rem, 1.8vw, 1.35rem); color: var(--ink-mid); max-width: 800px; }
 
-body {
-background-color: var(--bg-page);
-color: var(--ink-primary);
-font-family: var(--font-body);
-line-height: 1.75;
-font-size: 18px;
-overflow-x: hidden;
--webkit-font-smoothing: antialiased;
-cursor: auto;
-}
+        /* --- BENTO GRID: MODULAR THINKING --- */
+        .grid-12 { display: grid; grid-template-columns: repeat(12, 1fr); gap: 24px; }
+        .card { 
+            background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 40px; 
+            padding: 60px; position: relative; overflow: hidden;
+        }
+        .card-mustard { background: var(--mustard); color: #000; border: none; }
+        .span-8 { grid-column: span 8; }
+        .span-4 { grid-column: span 4; }
+        .span-6 { grid-column: span 6; }
 
-/* --- 2. CUSTOM CURSOR (DESKTOP ONLY) --- */
-.cursor-dot, .cursor-outline { display: none; }
+        /* --- THE MESSY MIDDLE: RAW FIDELITY (SYMMETRY BREAKER) --- */
+        .messy-middle-wrap { width: 100%; overflow-x: auto; display: flex; gap: 40px; padding: 40px 0; scroll-snap-type: x mandatory; }
+        .messy-card { flex: 0 0 550px; height: 650px; background: #111; border-radius: 24px; overflow: hidden; position: relative; scroll-snap-align: start; border: 1px solid #222; }
+        .messy-card img { width: 100%; height: 100%; object-fit: cover; opacity: 0.6; filter: grayscale(1); transition: 0.6s var(--ease); }
+        .messy-card:hover img { opacity: 1; filter: grayscale(0); }
+        .annotation { position: absolute; background: #ff4444; color: #fff; padding: 10px 15px; font-family: var(--font-mono); font-size: 11px; border-radius: 4px; z-index: 10; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
 
-@media (hover: hover) and (pointer: fine) {
-* { cursor: none !important; }
+        /* --- 5 WHYS TIMELINE: SCROLLYTELLING --- */
+        .timeline-container { position: relative; padding-left: 60px; border-left: 2px solid #222; margin-top: 60px; z-index: 50; }
+        .timeline-step { 
+            margin-bottom: 100px; 
+            position: relative; 
+            opacity: 0.15; 
+            transform: translateX(30px); 
+            transition: all 0.8s var(--ease); 
+        }
+        .timeline-step.active { 
+            opacity: 1 !important; 
+            transform: translateX(0) !important; 
+        }
+        .timeline-dot { 
+            position: absolute; left: -72px; top: 10px; width: 22px; height: 22px; 
+            background: var(--bg-dark); border: 4px solid #333; border-radius: 50%; transition: 0.5s;
+        }
+        .timeline-step.active .timeline-dot { 
+            background: var(--mustard); border-color: var(--mustard); 
+            box-shadow: 0 0 40px var(--mustard);
+        }
 
-.cursor-dot {
-display: block;
-position: fixed; top: 0; left: 0;
-width: 6px; height: 6px;
-background: var(--ink-primary);
-border-radius: 50%;
-pointer-events: none; z-index: 10001;
-transform: translate(-50%, -50%);
-}
-.cursor-outline {
-display: block;
-position: fixed; top: 0; left: 0;
-width: 40px; height: 40px;
-border: 1px solid rgba(17, 17, 17, 0.3);
-border-radius: 50%;
-pointer-events: none; z-index: 10000;
-transform: translate(-50%, -50%);
-transition: width 0.2s, height 0.2s, background-color 0.2s, border-color 0.2s;
-}
+        /* --- LOGIC CIRCUIT: INTERACTIVE FEEDBACK LOOP --- */
+        .logic-card { display: flex; flex-direction: column; gap: 40px; position: relative; }
+        .logic-step { display: grid; grid-template-columns: 1fr 60px 1fr; align-items: center; gap: 30px; }
+        .failure-node {
+            background: rgba(255, 68, 68, 0.03); border: 1px dashed var(--error-red);
+            padding: 30px; border-radius: 20px; position: relative;
+        }
+        .pivot-node {
+            background: rgba(0, 255, 102, 0.03); border: 1px solid var(--success-green);
+            padding: 30px; border-radius: 20px; position: relative;
+            box-shadow: 0 0 40px rgba(0, 255, 102, 0.05);
+        }
+        .logic-connector { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .connector-line { width: 2px; height: 70px; background: #333; position: relative; }
+        .connector-pulse {
+            width: 10px; height: 10px; background: var(--mustard); border-radius: 50%;
+            position: absolute; top: -5px; animation: move-down 2.5s infinite linear;
+        }
+        @keyframes move-down { 
+            0% { top: 0; opacity: 0; } 50% { opacity: 1; } 100% { top: 100%; opacity: 0; }
+        }
+        .node-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 2px; text-transform: uppercase; display: block; margin-bottom: 12px; font-weight: 700; }
 
-body.hovering .cursor-outline {
-width: 60px; height: 60px;
-background-color: rgba(255, 214, 10, 0.15);
-border-color: var(--mustard);
-}
-body.hovering .cursor-dot {
-background: var(--mustard);
-}
-}
+        /* --- DESIGN SYSTEM SHOWCASE: DESCRIPTIVE & VISIBLE --- */
+        .ds-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 30px; margin-top: 60px; }
+        .ds-token-card { grid-column: span 4; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 32px; padding: 45px; transition: 0.4s var(--ease); }
+        .ds-token-card:hover { transform: translateY(-10px); border-color: var(--mustard-border); }
+        
+        .swatch-box { 
+            height: 180px; border-radius: 24px; margin-bottom: 30px; display: flex; 
+            flex-direction: column; justify-content: flex-end; padding: 25px; 
+            border: 1px solid var(--border-subtle); position: relative;
+        }
+        .ds-intent-label { 
+            font-family: var(--font-mono); font-size: 10px; padding: 6px 12px; 
+            background: rgba(255,255,255,0.05); color: var(--ink-mid); 
+            border-radius: 6px; display: inline-block; margin-bottom: 15px; text-transform: uppercase;
+        }
+        .ds-title { font-size: 22px; font-weight: 800; margin-bottom: 15px; color: var(--ink-high); }
+        .ds-desc { font-size: 14px; color: var(--ink-mid); line-height: 1.7; }
+        
+        /* Typography System */
+        .typo-spec-card { grid-column: span 6; background: #080808; padding: 50px; border-radius: 32px; border: 1px solid var(--border-subtle); position: relative; }
+        .typo-preview { font-size: 5rem; font-weight: 800; line-height: 0.9; margin-bottom: 30px; color: #fff; }
+        .typo-details { display: flex; gap: 40px; margin-top: 30px; border-top: 1px solid #1a1a1a; padding-top: 30px; }
+        .detail-item { flex: 1; }
+        .detail-label { font-family: var(--font-mono); font-size: 10px; color: var(--ink-low); text-transform: uppercase; letter-spacing: 1px; }
+        .detail-value { font-size: 15px; color: var(--ink-mid); margin-top: 6px; font-weight: 500; }
 
-/* --- 3. RESPONSIVE TYPOGRAPHY --- */
-h1, h2, h3, h4 {
-font-family: var(--font-head);
-color: var(--ink-primary);
-font-weight: 800;
-letter-spacing: -0.02em;
-line-height: 1.2;
-}
+        /* Spacing & A11y */
+        .spacing-viz-row { display: flex; align-items: center; gap: 15px; margin-top: 25px; }
+        .space-block { background: var(--mustard); opacity: 0.25; border: 1px solid var(--mustard); transition: 0.3s; }
+        .a11y-pill { 
+            display: inline-flex; align-items: center; gap: 12px; padding: 14px 24px; 
+            background: rgba(0,255,102,0.05); border: 1px solid var(--success-green); 
+            border-radius: 50px; margin-top: 35px; 
+        }
+        .a11y-dot { width: 14px; height: 14px; background: var(--success-green); border-radius: 50%; box-shadow: 0 0 15px var(--success-green); }
+        .a11y-info { font-family: var(--font-mono); font-size: 12px; color: var(--success-green); font-weight: 700; text-transform: uppercase; }
 
-.headline-lg { font-size: clamp(2.5rem, 6vw, 4.5rem); margin-bottom: 24px; }
-.headline-md { font-size: clamp(1.8rem, 4vw, 2.5rem); margin-bottom: 20px; }
-.body-lead { font-size: clamp(1.1rem, 2vw, 1.4rem); color: #333; line-height: 1.6; font-weight: 400; margin-bottom: 40px; max-width: 800px; }
-p { margin-bottom: 24px; color: var(--ink-secondary); }
+        /* --- AI INTERACTION: WAVEFORM IXD --- */
+        .ai-viz-frame { background: #080808; border: 1px solid #1a1a1a; padding: 50px; border-radius: 40px; margin-top: 50px; position: relative; }
+        .waveform-wrap { height: 120px; display: flex; align-items: center; gap: 6px; justify-content: center; }
+        .waveform-bar { width: 5px; height: 25px; background: var(--ai-blue); border-radius: 12px; animation: wave-motion 1.4s infinite ease-in-out; }
+        @keyframes wave-motion { 0%, 100% { height: 25px; opacity: 0.4; } 50% { height: 85px; opacity: 1; box-shadow: 0 0 20px var(--ai-blue); } }
 
-.chapter-label {
-font-family: var(--font-brand);
-font-size: 13px; font-weight: 700;
-color: var(--mustard-text);
-text-transform: uppercase; letter-spacing: 2px;
-margin-bottom: 24px; display: block;
-border-left: 3px solid var(--mustard); padding-left: 12px;
-}
+        /* --- DATA HUD & GATEKEEPER --- */
+        .hud-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 40px; }
+        .hud-box { border: 1px solid var(--border-subtle); padding: 35px; border-radius: 24px; background: linear-gradient(135deg, rgba(255,255,255,0.02), transparent); overflow: hidden; position: relative; }
+        .hud-box::after { content: ''; position: absolute; inset: 0; background: linear-gradient(rgba(255,214,10,0.03), transparent); pointer-events: none; }
+        .hud-value { font-family: var(--font-mono); font-size: 4.5rem; font-weight: 800; color: var(--mustard); line-height: 1; }
+        .hud-fill-track { width: 100%; height: 5px; background: #222; margin-top: 20px; border-radius: 3px; overflow: hidden; }
+        .hud-fill-bar { height: 100%; background: var(--mustard); width: 0%; box-shadow: 0 0 15px var(--mustard); transition: width 2.5s var(--ease); }
 
-/* --- 4. LAYOUT UTILITIES --- */
-.container { max-width: 1200px; margin: 0 auto; padding: 0 var(--container-pad); }
-.reading-width { max-width: 780px; margin: 0 auto; padding: 0 var(--container-pad); }
-.spacer { height: var(--spacing-lg); }
-.spacer-sm { height: var(--spacing-md); }
+        .parent-notif-stack { position: relative; height: 520px; }
+        .parent-notif-card {
+            position: absolute; width: 100%; background: rgba(255,255,255,0.04);
+            backdrop-filter: blur(25px); padding: 35px; border-radius: 32px;
+            border-left: 8px solid var(--mustard); border-top: 1px solid var(--border-subtle);
+            opacity: 0; transform: translateY(50px); box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+        }
 
-.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(40px, 5vw, 80px); align-items: center; }
-.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; }
+        /* --- MOCKUPS & ASSETS --- */
+        .phone-mock {
+            width: 340px; height: 680px; background: #000; border: 14px solid #1a1a1a;
+            border-radius: 60px; position: relative; margin: 0 auto;
+            box-shadow: 0 60px 120px rgba(0,0,0,0.8); overflow: hidden;
+        }
+        .phone-mock img { width: 100%; height: 100%; object-fit: cover; }
+        .kit-render {
+            width: 100%; height: 580px; background: radial-gradient(circle, #1a1a1a, transparent);
+            border-radius: 40px; display: flex; align-items: center; justify-content: center;
+        }
+        .kit-render img { width: 85%; filter: drop-shadow(0 40px 80px #000); }
 
-/* --- 5. NAVIGATION --- */
-.case-nav {
-position: fixed; top: 0; left: 0; width: 100%;
-background: rgba(255,255,255,0.95); backdrop-filter: blur(12px);
-border-bottom: 1px solid rgba(0,0,0,0.05); z-index: 1000;
-padding: 16px 0; transition: transform 0.3s;
-}
-.nav-inner { display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto; padding: 0 var(--container-pad); }
+        /* --- OUTCOMES HUD: MOTION DASHBOARD --- */
+        .outcome-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 35px; margin-top: 70px; }
+        .outcome-hud-card {
+            background: #111; border: 1px solid var(--border-subtle); border-radius: 40px; padding: 60px;
+            position: relative; overflow: hidden;
+        }
+        .outcome-hud-card::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px;
+            background: linear-gradient(to right, transparent, var(--mustard), transparent);
+            animation: scanner 4s infinite linear; opacity: 0.4;
+        }
+        @keyframes scanner { 0% { transform: translateY(0); top: 0; } 100% { transform: translateY(600px); top: 100%; } }
+        
+        .outcome-stat-xl { font-family: var(--font-mono); font-size: 6.5rem; font-weight: 800; color: var(--mustard); line-height: 0.9; letter-spacing: -4px; }
+        .outcome-graph-box { height: 140px; display: flex; align-items: flex-end; gap: 12px; margin-top: 40px; }
+        .bar-entity { flex: 1; background: var(--mustard-dim); border-radius: 6px; transition: height 2s var(--ease); height: 0; }
+        .bar-entity.active { background: var(--mustard); box-shadow: 0 0 25px var(--mustard-glass); }
 
-.nav-back {
-text-decoration: none; color: var(--ink-primary); font-weight: 700;
-font-family: var(--font-brand); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px;
-display: flex; align-items: center; gap: 8px; transition: color 0.2s;
-}
-.nav-back:hover { color: var(--mustard-text); }
-.nav-back span { font-size: 1.2rem; margin-top: -2px; }
+        /* --- REFLECTION SECTION --- */
+        .reflection-card { background: #080808; border: 1px solid var(--mustard-border); padding: 70px; border-radius: 50px; margin-top: 120px; }
 
-.nav-menu { display: flex; gap: 32px; }
-.nav-item {
-text-decoration: none; color: #555; font-size: 12px;
-font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
-transition: color 0.2s;
-}
-.nav-item:hover { color: var(--mustard-text); }
+        /* --- FOOTER --- */
+        footer { padding: 180px 0; border-top: 1px solid var(--border-subtle); text-align: center; }
+        .footer-cta { 
+            font-size: clamp(3rem, 10vw, 8rem); font-family: var(--font-head); font-weight: 800; 
+            color: #fff; text-decoration: none; line-height: 0.9;
+        }
+        .footer-cta span { color: var(--mustard); transition: 1s var(--ease); }
+        .footer-cta:hover span { letter-spacing: 20px; }
 
-/* --- 6. COMPONENTS --- */
-.stats-bar {
-display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;
-border-top: 1px solid #E5E5E5; border-bottom: 1px solid #E5E5E5;
-padding: 40px 0; margin-top: 60px;
-}
-.stat-label { font-size: 11px; text-transform: uppercase; color: #888; letter-spacing: 1px; margin-bottom: 8px; }
-.stat-value { font-size: clamp(14px, 2vw, 16px); font-weight: 600; color: #000; }
+        /* --- ANIMATION HELPERS --- */
+        .reveal { opacity: 0; transform: translateY(60px); }
 
-.insight-card {
-background: var(--bg-card); padding: clamp(24px, 4vw, 40px);
-border: 1px solid #eee; border-radius: var(--radius);
-transition: transform 0.3s; box-shadow: 0 10px 30px rgba(0,0,0,0.02); height: 100%;
-}
-.insight-card:hover { transform: translateY(-5px); border-color: var(--mustard); }
-.insight-num { font-family: var(--font-brand); font-size: 3rem; color: rgba(0,0,0,0.05); font-weight: 700; line-height: 1; margin-bottom: 10px; }
+        /* =========================================
+           RESPONSIVE MEDIA QUERIES
+           ========================================= */
+        
+        /* Tablet & Landscape */
+        @media (max-width: 1024px) {
+            .span-8, .span-4, .span-6 { grid-column: span 12; }
+            .nav-links { display: none; }
+            .hud-grid { grid-template-columns: 1fr; gap: 16px; }
+            .messy-card { flex: 0 0 400px; height: 500px; }
+        }
 
-.evolution-block {
-background: #F4F4F4; border-radius: var(--radius);
-padding: 30px; margin-bottom: 30px;
-display: flex; align-items: center; justify-content: space-between; gap: 20px;
-}
-.evo-state { flex: 1; background: #fff; padding: 20px; border-radius: 8px; text-align: center; border: 1px dashed #ccc; }
-.evo-arrow { color: var(--mustard); font-size: 1.5rem; font-weight: bold; }
-.evo-label { font-size: 11px; text-transform: uppercase; color: #888; display: block; margin-bottom: 8px; }
+        /* Mobile Phones (Portrait) */
+        @media (max-width: 768px) {
+            /* Layout & Spacing */
+            .container { padding: 0 24px; }
+            nav { padding: 20px 24px; }
+            .nav-logo { font-size: 20px; }
+            
+            .spacer { height: 100px; }
+            
+            /* Typography */
+            h1.display { line-height: 0.9; }
+            p.lead { font-size: 16px; line-height: 1.6; color: var(--ink-high) !important; /* Bright text fix */ }
+            
+            /* --- FIX: HERO SECTION DOWNWARD ADJUSTMENT --- */
+            #hero .reveal {
+                margin-top: 60px !important; /* Pushes text down on mobile */
+            }
 
-.ds-container { margin: 60px 0; padding: clamp(20px, 4vw, 40px); border: 1px solid #eee; border-radius: var(--radius); }
-.swatch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 20px; margin-bottom: 40px; }
-.swatch { height: 100px; border-radius: 8px; margin-bottom: 10px; border: 1px solid rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; }
-.typo-sample { font-family: var(--font-brand); font-size: clamp(1.5rem, 3vw, 2rem); line-height: 1.2; margin-bottom: 10px; }
+            /* Cards */
+            .card, .ds-token-card, .typo-spec-card, .outcome-hud-card, .reflection-card, .ai-viz-frame {
+                padding: 30px; border-radius: 24px;
+            }
+            .card-mustard { padding: 30px; }
+            
+            /* Timeline Mobile Fixes */
+            .timeline-container { padding-left: 24px; }
+            .timeline-dot { left: -34px; width: 16px; height: 16px; border-width: 3px; top: 5px; }
+            .timeline-step { margin-bottom: 60px; }
 
-.notif-stack { display: flex; flex-direction: column; gap: 16px; width: 100%; }
-.notif-card {
-background: #fff; padding: 20px; border-radius: 12px;
-box-shadow: 0 4px 20px rgba(0,0,0,0.06); border-left: 4px solid var(--mustard);
-display: flex; gap: 15px; align-items: start;
-}
-.notif-icon { width: 32px; height: 32px; background: var(--mustard-light); color: var(--mustard-text); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+            /* Logic Circuit Mobile Stack */
+            .logic-step { 
+                grid-template-columns: 1fr; 
+                gap: 20px; 
+                text-align: left; 
+            }
+            .logic-connector { 
+                transform: rotate(90deg); 
+                height: 50px; 
+                width: auto;
+                margin: 10px 0;
+            }
+            .connector-line { width: 2px; height: 100%; background: #333; position: relative; }
 
-.hero-img { width: 100%; height: auto; aspect-ratio: 16/9; background: #eee; border-radius: var(--radius); object-fit: cover; margin-top: 40px; }
-.phone-frame {
-width: 100%; max-width: 320px; aspect-ratio: 9/19; background: #050505;
-border: 8px solid #1a1a1a; border-radius: 40px; margin: 0 auto;
-box-shadow: 0 30px 60px rgba(0,0,0,0.2); overflow: hidden; position: relative;
-}
-.phone-frame img { width: 100%; height: 100%; object-fit: cover; }
+            /* --- FIX: MESSY MIDDLE SECTION (Section 03) --- */
+            .messy-middle-wrap { padding: 20px 0; gap: 20px; }
+            .messy-card { 
+                flex: 0 0 85vw; 
+                /* CRITICAL FIX: Change fixed height to auto so text is fully visible */
+                height: auto !important; 
+                min-height: 350px; /* Keep a base size for consistency */
+                border-radius: 16px; 
+            }
+            .annotation { font-size: 10px; padding: 8px 12px; }
 
-.box-render {
-width: 100%; aspect-ratio: 16/9; background: transparent;
-border-radius: var(--radius); display: flex; align-items: center; justify-content: center;
-box-shadow: 0 20px 40px rgba(0,0,0,0.05); position: relative; overflow: hidden;
-}
-.box-render img { width: 100%; height: 100%; object-fit: cover; border-radius: var(--radius); }
+            /* HUD & Outcomes Mobile */
+            .outcome-grid, .ds-grid, .typo-stats { display: flex; flex-direction: column; gap: 24px; }
+            .ds-token-card, .typo-spec-card { width: 100%; }
+            
+            .hud-box { padding: 24px; }
+            .hud-value { font-size: 3rem; }
+            
+            /* Outcome Graph Mobile */
+            .outcome-stat-xl { font-size: 4.5rem; }
+            
+            /* Phone Mockup Scaling */
+            .phone-mock { width: 90%; height: auto; aspect-ratio: 9/19; transform: scale(1); }
+            
+            /* --- FIX: GATEKEEPER SECTION OVERLAP --- */
+            /* Break grid items into block flow for mobile */
+            .grid-12 > .span-6 {
+                display: block;
+            }
 
-.sketch-container {
-width: 100%; margin: 40px 0; padding: 40px;
-background-color: #F4F4F4; border-radius: var(--radius);
-text-align: center; border: 2px dashed #CCC;
-}
-.sketch-img { max-width: 100%; height: auto; mix-blend-mode: multiply; filter: grayscale(1); }
+            /* Notification Stack Reset */
+            .parent-notif-stack {
+                position: static !important;
+                height: auto !important; /* Force auto height */
+                display: flex;
+                flex-direction: column;
+                gap: 20px;
+                margin-bottom: 40px; /* Add space between visuals and text */
+            }
 
-@media (max-width: 900px) {
-.grid-2, .grid-3 { grid-template-columns: 1fr; gap: 40px; }
-.stats-bar { grid-template-columns: 1fr 1fr; gap: 30px; }
-.evolution-block { flex-direction: column; text-align: center; }
-.evo-arrow { transform: rotate(90deg); }
-.nav-menu { display: none; }
-.grid-2 > div:nth-child(2) { order: -1; }
-.phone-frame { max-width: 280px; }
-}
-/* Parent Notification Styles */
-.notif-stack { 
-    display: flex; 
-    flex-direction: column; 
-    gap: 16px; 
-    width: 100%; 
-}
+            /* Individual Card Reset */
+            .parent-notif-card {
+                position: relative !important; /* Break out of absolute positioning */
+                top: auto !important;
+                transform: none !important;
+                opacity: 1 !important;
+                z-index: 1;
+            }
 
-.notif-card {
-    background: #fff; 
-    padding: 20px; 
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.06); 
-    border-left: 4px solid var(--mustard);
-    display: flex; 
-    gap: 15px; 
-    align-items: start; 
-    transition: transform 0.2s;
-}
+            /* --- FIX: TYPOGRAPHY SYSTEM CARD (Mobile Optimization) --- */
+            
+            /* 1. Force Preview and Titles to UPPERCASE */
+            .typo-preview {
+                text-transform: uppercase !important; /* Make POTENTIAL. uppercase */
+            }
+            .ds-title {
+                text-transform: uppercase !important; /* Make section title uppercase */
+            }
 
-.notif-card:hover { 
-    transform: scale(1.02); 
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-}
+            /* 2. Layout description text cleanly */
+            .ds-desc {
+                margin-bottom: 30px;
+                line-height: 1.5;
+            }
 
-.notif-icon { 
-    width: 32px; 
-    height: 32px; 
-    background: var(--mustard-light); 
-    color: var(--mustard-text); 
-    border-radius: 50%; 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    font-size: 14px; 
-    flex-shrink: 0; 
-}
-/* --- DESIGN SYSTEM STYLES --- */
+            /* 3. Stack "Weight" and "Spacing" details one by one (Vertical) */
+            .typo-details {
+                display: flex;
+                flex-direction: column; /* Stack items */
+                gap: 0; /* Removing default gap, using borders for separation */
+                margin-top: 20px;
+                padding-top: 20px;
+                border-top: 1px solid #333;
+            }
 
-/* Palette Grid */
-.palette-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
-}
+            /* 4. Each detail item becomes a distinct "paragraph" block */
+            .detail-item {
+                width: 100%;
+                flex: 1;
+                padding: 15px 0; /* Vertical padding for breathing room */
+                border-bottom: 1px solid #222; /* Separator line */
+                display: flex;
+                flex-direction: column; /* Label on top of value */
+                align-items: flex-start;
+                gap: 8px;
+            }
 
-.palette-card {
-    background: #fff;
-    border: 1px solid #eee;
-    border-radius: 12px;
-    padding: 15px;
-    transition: transform 0.3s;
-}
-.palette-card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+            /* Last item remove border */
+            .detail-item:last-child {
+                border-bottom: none;
+            }
 
-.palette-swatch {
-    width: 100%;
-    height: 80px;
-    border-radius: 8px;
-    margin-bottom: 15px;
-    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.05);
-}
+            /* Enhance Value Visibility */
+            .detail-value {
+                font-size: 18px; /* Make spec value bigger/whiter for readability */
+                color: var(--ink-high);
+            }
 
-.palette-info h5 { margin: 0; font-size: 1rem; font-weight: 700; }
-.palette-info code { display: block; font-family: monospace; color: #888; font-size: 0.85rem; margin-bottom: 10px; }
-.palette-info p { margin: 0; font-size: 0.85rem; color: #333; line-height: 1.4; }
-.palette-desc { color: #666 !important; margin-top: 5px !important; font-size: 0.8rem !important; }
+            /* Kit Render */
+            .kit-render { height: 300px; }
+            .kit-render img { width: 70%; }
 
-/* Typography Table */
-.type-container {
-    background: #fff;
-    border: 1px solid #eee;
-    border-radius: 16px;
-    padding: 40px;
-}
-
-.type-row {
-    display: grid;
-    grid-template-columns: 100px 1fr 150px;
-    align-items: start;
-    gap: 40px;
-}
-
-.type-label {
-    font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;
-    color: #888; font-weight: 700; margin-top: 10px;
-}
-
-.type-badge {
-    font-size: 0.75rem; background: #f0f0f0; padding: 4px 8px;
-    border-radius: 4px; color: #333; font-family: monospace;
-}
-
-.type-preview {
-    font-size: 3rem; color: #000; opacity: 0.1;
-    text-align: right; line-height: 1;
-}
-
-/* Mobile Responsiveness for Design System */
-@media (max-width: 768px) {
-    .type-row { grid-template-columns: 1fr; gap: 20px; }
-    .type-preview { display: none; } /* Hide big Aa on mobile */
-    .type-label { margin-top: 0; color: var(--mustard-text); }
-}
-</style>
+            /* Footer */
+            footer { padding: 100px 0; }
+            
+            /* Show cursor for touch devices (optional, but cleaner) */
+            body { cursor: auto; }
+            #cursor-ball, #cursor-outline { display: none; }
+        }
+    </style>
 </head>
 <body>
 
-<div class="cursor-dot"></div>
-<div class="cursor-outline"></div>
+<!-- MUSTARD CUBE 3D ENGINE (THREE.JS) -->
+<canvas id="cube-canvas" aria-hidden="true"></canvas>
 
-<nav class="case-nav">
-<div class="nav-inner">
-<a href="work.html" class="nav-back">
-<span>←</span> Back to Portfolio
-</a>
-<div class="nav-menu">
-<a href="#context" class="nav-item">Context</a>
-<a href="#research" class="nav-item">Research</a>
-<a href="#solution" class="nav-item">Ecosystem</a>
-<a href="#parent" class="nav-item">Viability</a>
-<a href="#impact" class="nav-item">Impact</a>
-</div>
-</div>
+<!-- CUSTOM KINETIC INTERFACE ELEMENTS -->
+<div id="cursor-ball" aria-hidden="true"></div>
+<div id="cursor-outline" aria-hidden="true"></div>
+
+<!-- NAVIGATION -->
+<nav role="navigation">
+    <a href="#" class="nav-logo">CAREER<span>EXPO.</span></a>
+    <ul class="nav-links">
+        <li><a href="#bottleneck">Why</a></li>
+        <li><a href="#messy">The Mess</a></li>
+        <li><a href="#pivots">Pivots</a></li>
+        <li><a href="#system">The System</a></li>
+        <li><a href="#outcomes">Results</a></li>
+    </ul>
 </nav>
 
-<!-- HERO SECTION -->
-<header class="container hero" style="padding-top: 140px; padding-bottom: 80px;">
-<span class="chapter-label">Case Study • 2025</span>
-<h1 class="headline-lg">Career<span style="color:var(--mustard);">Expo</span></h1>
-<p class="body-lead">
-A "Phygital" career simulator that bridges the gap between digital discovery and physical internships, replacing the "Summer of Confusion" with a data-driven quest.
-</p>
-
-<img src="careerexpo1.jpg" alt="Sandbox Semester Hero Image" class="hero-img interactive">
-
-<div class="stats-bar">
-<div><div class="stat-label">Role</div><div class="stat-value">Product Designer</div></div>
-<div><div class="stat-label">Timeline</div><div class="stat-value">4 Weeks Sprint</div></div>
-<div><div class="stat-label">Core Feature</div><div class="stat-value">Phygital Loot Crates</div></div>
-<!-- Updated Stat -->
-<div><div class="stat-label">Tech</div><div class="stat-value">Voice & Behavioral AI ,Figma</div></div>
-</div>
-</header>
-
-<!-- 01. CONTEXT -->
-<section id="context" class="reading-width">
-<div class="spacer"></div>
-<span class="chapter-label">01 / The Context</span>
-<h2 class="headline-md">The 10th Grade Bottleneck.</h2>
-<p>In India, the transition from 10th to 11th grade is critical. Students must choose a "Stream" (Science, Commerce, Arts) that dictates their entire future. Currently, this decision is based on <b>fear</b> and <b>rote memorization</b> marks, not actual aptitude.</p>
-<p>Students are paralyzed by choice ("Netflix Paralysis"), while parents block non-traditional careers because they lack "safe" financial data. The result? A generation of students who have book knowledge but zero real-world context.</p>
-
-<div style="background: var(--mustard-light); padding: 30px; border-radius: 12px; margin: 40px 0; border-left: 4px solid var(--mustard);">
-<h4 style="font-size: 1.1rem; margin-bottom: 10px; color: var(--mustard-text);">The HMW Statement</h4>
-<p style="margin-bottom: 0; font-weight: 500; color: #5d4a05;">
-How might we help students visualize and <span style="text-decoration:underline;">physically test-drive</span> future career paths based on their skills, making it easier (and safer) for them to decide?
-</p>
-</div>
+<!-- HERO: THE HUMAN STATEMENT -->
+<section id="hero" style="min-height: 100vh; display: flex; align-items: center;">
+    <div class="container" role="banner">
+        <span class="tag-mono reveal">A UX Case Study by Eeshitvaa</span>
+        <h1 class="display reveal">How I built a <br><span style="color:var(--mustard)">Career Simulator.</span></h1>
+        <p class="lead reveal" style="margin-top: 40px;">
+            I wanted to solve a problem I lived through: high-pressure stream selection bottleneck in India. Here is how I designed a phygital ecosystem to bridge gap between digital discovery and physical reality.
+        </p>
+        
+        <div style="display: flex; flex-wrap: wrap; gap: 40px; margin-top: 60px;" class="reveal">
+            <div><p class="tag-mono" style="margin:0;">Pilot Scale</p><p style="font-weight:700; font-size: 1.3rem;">12/15 Succeeded</p></div>
+            <div><p class="tag-mono" style="margin:0;">IxD Framework</p><p style="font-weight:700; font-size: 1.3rem;">Voice AI + Phygital</p></div>
+            <div><p class="tag-mono" style="margin:0;">Country</p><p style="font-weight:700; font-size: 1.3rem;">India</p></div>
+        </div>
+    </div>
 </section>
 
-<!-- 02. RESEARCH -->
+<!-- 01. THE BOTTLENECK -->
+<section id="bottleneck" class="container">
+    <div class="spacer"></div>
+    <div class="grid-12">
+        <div class="card span-8 reveal">
+            <span class="tag-mono">01 / The Why</span>
+            <h2 class="headline">Why I started this journey.</h2>
+            <p class="lead">
+                In India, we choose our career path at age 15 based on marks, not passion. I realized students were paralyzed by "Netflix Paralysis," while parents were terrified of non-traditional careers. I saw a system that prioritized <b>rote memory</b> over <b>true aptitude.</b>
+            </p>
+            
+            <!-- HUD DATA: DYNAMIC INSIGHTS -->
+            <div class="hud-grid">
+                <div class="hud-box">
+                    <span class="tag-mono" style="font-size: 10px;">Decision Fatigue</span>
+                    <div class="hud-value" data-val="85">0%</div>
+                    <div class="hud-fill-track"><div class="hud-fill-bar" data-w="85%"></div></div>
+                </div>
+                <div class="hud-box">
+                    <span class="tag-mono" style="font-size: 10px;">Parental Anxiety</span>
+                    <div class="hud-value" data-val="92">0%</div>
+                    <div class="hud-fill-track"><div class="hud-fill-bar" data-w="92%"></div></div>
+                </div>
+                <div class="hud-box">
+                    <span class="tag-mono" style="font-size: 10px;">Aptitude Awareness</span>
+                    <div class="hud-value" data-val="14">0%</div>
+                    <div class="hud-fill-track"><div class="hud-fill-bar" data-w="14%"></div></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card card-mustard span-4 reveal">
+            <p style="font-weight: 700; font-size: 1.6rem; line-height: 1.3;">"I don't need another list of jobs. I want to touch the tools before I commit 4 years to a degree."</p>
+            <div style="margin-top: 40px; width: 100%; height: 2px; background: #000; opacity: 0.1;"></div>
+            <p style="font-size: 15px; margin-top: 30px; opacity: 0.8; font-weight: 500;">— Student Pilot Participant #4</p>
+        </div>
+    </div>
+</section>
+
+<!-- 02. RESEARCH: INTERACTIVE 5 WHYS -->
 <section id="research" class="container">
-<div class="spacer"></div>
-<div class="reading-width">
-<span class="chapter-label">02 / Research & Process</span>
-<h2 class="headline-md">Digging Deeper: The 5 Whys.</h2>
-<p>I didn't just want to know <i>what</i> they wanted, but <i>why</i> they were scared. I conducted 10 student interviews and 5 parent interviews using the "5 Whys" framework.</p>
-</div>
-
-<div class="grid-3" style="margin-top: 50px;">
-<div class="insight-card interactive">
-<div class="insight-num">01</div>
-<h4>The Trust Gap</h4>
-<p style="font-size: 0.95rem; margin-top: 15px;">Parents don't hate Design; they hate <b>Risk</b>. They said, <i>"I don't know if this job pays well."</i> They needed data, not passion.</p>
-</div>
-<div class="insight-card interactive">
-<div class="insight-num">02</div>
-<h4>The Autonomy Issue</h4>
-<p style="font-size: 0.95rem; margin-top: 15px;">Students feel suffocated by "Career Counseling" that feels like school. If it's mandatory, they reject it.</p>
-</div>
-<div class="insight-card interactive">
-<div class="insight-num">03</div>
-<h4>Tangibility</h4>
-<p style="font-size: 0.95rem; margin-top: 15px;"><i>"Watching a video isn't the same as doing it."</i> Students feel like imposters in workplaces. They need a "Uniform" to feel professional.</p>
-</div>
-</div>
-
-<div class="spacer-sm"></div>
-<div class="reading-width">
-<h4 style="font-size: 1.1rem; color: var(--ink-secondary);">From Chaos to Clarity</h4>
-<p>We didn't start with an app. We started with a wall of sticky notes. Using the <b>"How Might We"</b> framework, we mapped out every possible way to simulate a career.</p>
-
-<div class="sketch-container interactive" style="padding: 20px;">
-<img src="brainstorming.jpeg" alt="Brainstorming wall with sticky notes" class="sketch-img" style="border-radius: 8px; mix-blend-mode: normal; filter: none; width: 100%;">
-<p style="font-size: 0.8rem; color: #888; margin-top: 15px; margin-bottom: 0;">
-<b>The Ideation Wall:</b> Moving from abstract problems to tangible solutions.
-</p>
-</div>
-</div>
+    <div class="spacer"></div>
+    <div class="grid-12">
+        <div class="span-6 reveal">
+            <span class="tag-mono">02 / Research Methodology</span>
+            <h2 class="headline">How I learned by<br>asking "Why?"</h2>
+            <p class="lead">
+                I sat down with 15 students to understand the root of the "Choice Crisis." It wasn't just about jobs; it was about the <b>Trust Gap</b> between two generations.
+            </p>
+            
+            <!-- THE SCROLLY TIMELINE -->
+            <div class="timeline-container">
+                <div class="timeline-step">
+                    <div class="timeline-dot"></div>
+                    <p class="tag-mono">Q1: WHY ENGINEERING?</p>
+                    <p style="font-size: 20px; font-weight: 600; color: #fff;">"Because my marks in Math were 95%."</p>
+                </div>
+                <div class="timeline-step">
+                    <div class="timeline-dot"></div>
+                    <p class="tag-mono">Q2: WHY DO MARKS DEFINE THE CHOICE?</p>
+                    <p style="font-size: 20px; font-weight: 600; color: #fff;">"My parents think marks translate to career safety."</p>
+                </div>
+                <div class="timeline-step">
+                    <div class="timeline-dot"></div>
+                    <p class="tag-mono">Q3: WHY IS SAFETY THE TOP PRIORITY?</p>
+                    <p style="font-size: 20px; font-weight: 600; color: #fff;">"They don't know if creative fields like Design pay well."</p>
+                </div>
+                <div class="timeline-step" style="background: rgba(255, 214, 10, 0.05); padding: 40px; border-radius: 24px; border: 1px solid var(--mustard-border);">
+                    <div class="timeline-dot"></div>
+                    <p class="tag-mono">THE BREAKTHROUGH INSIGHT</p>
+                    <p style="font-size: 21px; font-weight: 700; color: var(--mustard); line-height: 1.4;">Aptitude is invisible until practiced. I needed to make student aptitude visible to parents through tangible data and physical proof.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="span-6 reveal">
+            <!-- WHITEBOARD ASSET -->
+            <div class="card" style="padding:0; height:500px; margin-bottom: 24px; border-radius: 30px;">
+                <img src="brainstorming.jpeg" style="width:100%; height:100%; object-fit:cover; opacity:0.6;" alt="Research Synthesis Whiteboard">
+                <div style="position:absolute; bottom:30px; left:30px; background:rgba(0,0,0,0.85); padding:15px; font-size:12px; font-family:var(--font-mono); border: 1px solid var(--border-bold);">
+                    FIG 1: Synthesizing 120+ qualitative sticky notes.
+                </div>
+            </div>
+            <!-- ANECDOTE CALLOUT -->
+            <div class="card" style="border: 1px solid #ff4444; background: rgba(255,68,68,0.05); padding: 45px;">
+                <h4 style="color:#ff4444; font-family:var(--font-mono); font-size:12px; letter-spacing: 2px;">THE HUMANISED ANECDOTE</h4>
+                <p style="margin-top:20px; font-size: 1.1rem; line-height: 1.6;">
+                    One father I interviewed in dehradun was terrified his son would choose a "hobby" over a "career." That's when I realized the dashboard needed to show <b>Hard Salary ROI Data</b>, not just "Passion" metrics, to win over the gatekeeper.
+                </p>
+            </div>
+        </div>
+    </div>
 </section>
 
-<!-- MARKET GAP SECTION -->
-<section class="container">
-<div class="spacer-sm"></div>
-<div class="reading-width">
-<h4 style="font-size: 1.1rem; color: var(--ink-secondary); margin-bottom: 20px;">The Market Gap</h4>
-<p>I analyzed the landscape not by "Features," but by "Mental Models." The current market treats career discovery as <b>Homework</b>. I wanted to treat it as <b>Entertainment</b>.</p>
-</div>
-
-<div class="grid-3" style="margin-top: 40px;">
-<div style="background: #F4F4F4; padding: 30px; border-radius: 16px; border: 1px solid #eee;" class="interactive">
-<div style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: #888; margin-bottom: 10px;">The Status Quo</div>
-<h3 style="font-size: 1.4rem; margin-bottom: 15px;">LinkedIn / Indeed</h3>
-<p style="font-size: 0.9rem; margin-top: 15px; color: #555;">Great for getting a job. Terrible for <i>discovering</i> who you want to be.</p>
-</div>
-<div style="background: #F4F4F4; padding: 30px; border-radius: 16px; border: 1px solid #eee;" class="interactive">
-<div style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: #888; margin-bottom: 10px;">The Competition</div>
-<h3 style="font-size: 1.4rem; margin-bottom: 15px;">Instagram / Reels</h3>
-<p style="font-size: 0.9rem; margin-top: 15px; color: #555;">High engagement, but zero depth. It sells a fantasy, not a career path.</p>
-</div>
-<div style="background: #111; color: #fff; padding: 30px; border-radius: 16px; position: relative; overflow: hidden;" class="interactive">
-<div style="position: absolute; top: -20px; right: -20px; width: 100px; height: 100px; background: var(--mustard); filter: blur(40px); opacity: 0.4;"></div>
-<div style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: var(--mustard); margin-bottom: 10px;">The Solution</div>
-<h3 style="font-size: 1.4rem; margin-bottom: 15px; color: #fff;">Sandbox Semester</h3>
-<div style="display: flex; gap: 10px; flex-wrap: wrap;">
-<span style="background: rgba(255,255,255,0.1); padding: 5px 10px; border-radius: 4px; font-size: 0.75rem;">Gamified</span>
-<span style="background: rgba(255,255,255,0.1); padding: 5px 10px; border-radius: 4px; font-size: 0.75rem;">Phygital</span>
-</div>
-<p style="font-size: 0.9rem; margin-top: 15px; color: #ccc;">Combining the <b>Discovery</b> of Netflix with the <b>Delivery</b> of Amazon.</p>
-</div>
-</div>
+<!-- 03. THE MESSY MIDDLE: BREAKING SYMMETRY -->
+<section id="messy" class="container">
+    <div class="spacer"></div>
+    <span class="tag-mono">03 / The Messy Middle</span>
+    <h2 class="headline">Design isn't always clean.</h2>
+    <p class="lead">I wanted to show the stuff usually hidden: the sketches that didn't work, the horizontal scrolling of raw wireframe explorations, and the chaotic "Failed" UI states.</p>
+    
+    <div class="messy-middle-wrap">
+        <!-- MESSY 1 -->
+        <div class="messy-card">
+            <div class="annotation" style="top:30px; left:30px;">Brainstorming </div>
+            <img src="brainstorming.jpeg" alt="Rough Napkin Sketch">
+        </div>
+        
+        <!-- MESSY 3 -->
+        <div class="messy-card" style="background:#0a0a0a; display:flex; flex-direction:column; justify-content:center; padding:50px; border: 1px dashed #444;">
+            <span class="tag-mono" style="font-size: 10px; color: var(--ink-low);">Log Entry // Sprint 2</span>
+            <p style="font-family:var(--font-mono); font-size:15px; color:var(--ink-mid); margin-top: 20px;">
+                "I realized during user testing that the word 'Internship' scared the kids. It sounded too much like 'Office Work.' I decided to rename the entire flow as 'Quests' and 'Loot Crates.' Engagement immediately doubled."
+            </p>
+            <div style="margin-top: 40px; height: 1px; background: #222;"></div>
+            <p style="font-family:var(--font-mono); font-size:10px; color:#ff4444; margin-top: 20px;">>> PIVOT_TRIGGERED: CONTENT_RESTRATEGY</p>
+        </div>
+    </div>
 </section>
 
-<!-- 03. FEEDBACK LOOP (UPDATED) -->
-<section id="feedback" class="reading-width">
-<div class="spacer"></div>
-<span class="chapter-label">03 / The Feedback Loop</span>
-<h2 class="headline-md">I was wrong. Here is how I pivoted.</h2>
-<p>My first prototype was disjointed. I showed users a "Sandbox" idea and a separate "Job Dictionary." Their feedback forced me to combine everything into one ecosystem.</p>
+<!-- 04. PIVOTS: LOGIC CIRCUIT -->
+<section id="pivots" class="container">
+    <div class="spacer"></div>
+    <span class="tag-mono">04 / My Evolution Circuit</span>
+    <h2 class="headline">What I got wrong.</h2>
+    <p class="lead">Testing with real humans forced me to scrap features I initially loved. Here is the logic circuit of my pivots.</p>
 
-<div class="evolution-block interactive">
-<div class="evo-state">
-<span class="evo-label">Idea 1 + Idea 2</span>
-<strong>Sandbox + Dictionary (Separate)</strong>
-</div>
-<div class="evo-arrow">→</div>
-<div class="evo-state">
-<span class="evo-label">Synthesis</span>
-<strong>Integrated Discovery Layer</strong>
-</div>
-</div>
-<p style="font-size: 0.9rem; color: #666; margin-top: -20px; margin-bottom: 40px;"><i>"I liked the Dictionary info but the Sandbox fun."</i> — I combined them: The Dictionary became the "Data Layer" inside the Gamified Sandbox app.</p>
+    <div class="logic-card reveal" style="margin-top: 80px;">
+        <!-- PIVOT 1 -->
+        <div class="logic-step">
+            <div class="failure-node">
+                <span class="node-label" style="color:var(--error-red);">MY ASSUMPTION</span>
+                <p style="font-size:15px; color: var(--ink-mid);">Students wanted a separate "Job Dictionary" to read about salaries first.</p>
+            </div>
+            <div class="logic-connector">
+                <div class="connector-line"><div class="connector-pulse"></div></div>
+            </div>
+            <div class="pivot-node">
+                <span class="node-label" style="color:var(--success-green);">MY CORRECTION</span>
+                <p style="font-size:15px;">No one read the text. I integrated all data <i>inside</i> POV Quest Cards. Context-first discovery.</p>
+            </div>
+        </div>
 
-<div class="evolution-block interactive">
-<div class="evo-state">
-<span class="evo-label">Card Sorting Insight</span>
-<strong>Blue/White Collar Only</strong>
-</div>
-<div class="evo-arrow">→</div>
-<div class="evo-state">
-<span class="evo-label">The Missing Piece</span>
-<strong>Added "Creative Collar"</strong>
-</div>
-</div>
-<p style="font-size: 0.9rem; color: #666; margin-top: -20px; margin-bottom: 40px;"><i>"Where are the artists? Where are the chefs?"</i> — During card sorting, users demanded non-traditional paths. I added a specific "Creative Collar" stream.</p>
-
-<div class="evolution-block interactive">
-<div class="evo-state">
-<span class="evo-label">Assumption</span>
-<strong>Mandatory Curriculum</strong>
-</div>
-<div class="evo-arrow">→</div>
-<div class="evo-state">
-<span class="evo-label">User Pivot</span>
-<strong>Voluntary "Season Pass"</strong>
-</div>
-</div>
-<p style="font-size: 0.9rem; color: #666; margin-top: -20px; margin-bottom: 40px;"><i>"If it's an obligation, I won't do it."</i> — This was critical. I shifted the model from "Schoolwork" to a "Voluntary Subscription" to ensure genuine engagement.</p>
-
-<div class="evolution-block interactive">
-<div class="evo-state">
-<span class="evo-label">Friction Point</span>
-<strong>Forced Generalist Path</strong>
-</div>
-<div class="evo-arrow">→</div>
-<div class="evo-state">
-<span class="evo-label">Solution</span>
-<strong>Full Autonomy (The Filter)</strong>
-</div>
-</div>
-<p style="font-size: 0.9rem; color: #666; margin-top: -20px;"><i>"I know I don't want to be a doctor."</i> — Users wanted to filter out jobs they hated. I gave them total autonomy to choose <i>whatever</i> and <i>whichever</i> profession they wanted to test.</p>
+        <!-- PIVOT 2 -->
+        <div class="logic-step">
+            <div class="failure-node">
+                <span class="node-label" style="color:var(--error-red);">MY ASSUMPTION</span>
+                <p style="font-size:15px; color: var(--ink-mid);">Facial Sentiment AI would be the best way to track student excitement.</p>
+            </div>
+            <div class="logic-connector">
+                <div class="connector-line"><div class="connector-pulse"></div></div>
+            </div>
+            <div class="pivot-node">
+                <span class="node-label" style="color:var(--success-green);">MY CORRECTION</span>
+                <p style="font-size:15px;">Students felt "Spied on." I switched to <b>Behavioral Voice AI.</b> Less invasive, higher trust.</p>
+            </div>
+        </div>
+    </div>
 </section>
 
-<!-- 04. DESIGN SYSTEM (UPGRADED) -->
+<!-- 05. DESIGN SYSTEM: DESCRIPTIVE & DEEP -->
 <section id="system" class="container">
     <div class="spacer"></div>
-    <span class="chapter-label">04 / Design System</span>
-    <h2 class="headline-md">Visual Language: "Construction Chic."</h2>
+    <span class="tag-mono">05 / The System I built</span>
+    <h2 class="headline">Why "Construction Chic"?</h2>
+    <p class="lead">I rejected the boring "Corporate Blue" of most apps. I wanted a visual language that screamed <b>"Building"</b> and <b>"Work in Progress."</b></p>
+
+    <div class="ds-grid reveal">
+        <!-- COLOR LOGIC -->
+        <div class="ds-token-card">
+            <div class="swatch-box" style="background: var(--mustard); color: #000;">
+                <code style="font-weight: 800;">#FFD60A</code>
+            </div>
+            <div class="ds-intent-label">Visual Psychology</div>
+            <h4 class="ds-title">Safety Mustard</h4>
+            <p class="ds-desc">Safety Yellow triggers high focus. By using it as our Primary, I signaled that the app isn't a "Playground"—it's a "Construction Site" for their future.</p>
+            <!-- Accessibility Check -->
+            <div class="a11y-pill">
+                <div class="a11y-dot"></div>
+                <span class="a11y-info">WCAG AAA / 13:1 Contrast OK</span>
+            </div>
+        </div>
+
+        <!-- TYPO LOGIC -->
+        <div class="ds-token-card">
+            <div class="swatch-box" style="background: #111; border: 1px solid #333;">
+                <p style="font-family: var(--font-mono); font-size: 28px; font-weight: 700;">Aa 123</p>
+            </div>
+            <div class="ds-intent-label">Identity Framework</div>
+            <h4 class="ds-title">Space Grotesk</h4>
+            <p class="ds-desc">I chose this for its "ink traps." It feels engineered and technical—bridging the gap between gaming UI and professional industrial software.</p>
+        </div>
+
+        <!-- GRID LOGIC -->
+        <div class="ds-token-card">
+            <div class="swatch-box" style="background: #000; border: 1px dashed #444;">
+                <div class="spacing-viz-row">
+                    <div class="space-block" style="width: 8px; height: 8px;"></div>
+                    <div class="space-block" style="width: 16px; height: 16px;"></div>
+                    <div class="space-block" style="width: 32px; height: 32px;"></div>
+                    <div class="space-block" style="width: 64px; height: 64px;"></div>
+                </div>
+            </div>
+            <div class="ds-intent-label">Precision Engineering</div>
+            <h4 class="ds-title">8px Hard Grid</h4>
+            <p class="ds-desc">I used a strict modular scale to ensure developer handoff was seamless. Every Radar chart, button, and card aligns to an 8px base unit.</p>
+        </div>
+    </div>
+
+    <!-- TYPE SPECIMENS -->
     
-    <div class="reading-width" style="margin: 0; padding: 0;">
-        <p>
-            To differentiate CareerExpo from boring educational tools (like LinkedIn or Coursera), I rejected the standard "Corporate Blue" palette. 
-        </p>
-        <p>
-            I developed a visual identity that sits at the intersection of <b>Gaming UI</b> (Valorant/Discord) and <b>Industrial Construction</b>. The metaphor? The student is <i>building</i> their future, so the tools should feel heavy, industrial, and cool.
-        </p>
-    </div>
-
-    <!-- COLOR PALETTE SECTION -->
-    <div style="margin-top: 60px;">
-        <h4 style="font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; color: #888; margin-bottom: 20px;">01. The Palette</h4>
-        
-        <div class="palette-grid">
-            <!-- Color 1 -->
-            <div class="palette-card">
-                <div class="palette-swatch" style="background: #050505;"></div>
-                <div class="palette-info">
-                    <h5>Midnight</h5>
-                    <code>#050505</code>
-                    <p><b>Use:</b> Backgrounds</p>
-                    <p class="palette-desc">Reduces eye strain. Signals "Gaming Mode" rather than "Study Mode."</p>
-                </div>
-            </div>
-            <!-- Color 2 -->
-            <div class="palette-card">
-                <div class="palette-swatch" style="background: #FFD60A;"></div>
-                <div class="palette-info">
-                    <h5>Safety Yellow</h5>
-                    <code>#FFD60A</code>
-                    <p><b>Use:</b> Call to Actions</p>
-                    <p class="palette-desc">High visibility. Borrowed from construction zones/hazard tape.</p>
-                </div>
-            </div>
-            <!-- Color 3 -->
-            <div class="palette-card">
-                <div class="palette-swatch" style="background: #1A1A1A;"></div>
-                <div class="palette-info">
-                    <h5>Concrete</h5>
-                    <code>#1A1A1A</code>
-                    <p><b>Use:</b> Surface Cards</p>
-                    <p class="palette-desc">Softens the contrast against the black background.</p>
-                </div>
-            </div>
-            <!-- Color 4 -->
-            <div class="palette-card">
-                <div class="palette-swatch" style="background: #FFFFFF; border: 1px solid #eee;"></div>
-                <div class="palette-info">
-                    <h5>Pure White</h5>
-                    <code>#FFFFFF</code>
-                    <p><b>Use:</b> Primary Text</p>
-                    <p class="palette-desc">Maximum legibility for reading career data.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- TYPOGRAPHY SECTION -->
-    <div style="margin-top: 80px;">
-        <h4 style="font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; color: #888; margin-bottom: 20px;">02. Typography</h4>
-        
-        <div class="type-container">
-            <!-- HEADINGS -->
-            <div class="type-row">
-                <div class="type-label">Headings</div>
-                <div class="type-example">
-                    <span style="font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 2.5rem; line-height: 1.1;">Space Grotesk</span>
-                    <div style="margin-top: 15px; display: flex; gap: 10px;">
-                        <span class="type-badge">Bold (700)</span>
-                        <span class="type-badge">Medium (500)</span>
-                    </div>
-                    <p style="font-size: 0.9rem; color: #666; margin-top: 15px;">
-                        A brutalist, geometric sans-serif. Its quirky "ink traps" give it a technical, engineered feel suitable for Gen Z.
-                    </p>
-                </div>
-                <div class="type-preview" style="font-family: 'Space Grotesk', sans-serif; font-weight: 700;">Aa Bb Cc</div>
-            </div>
-
-            <div style="width: 100%; height: 1px; background: #eee; margin: 30px 0;"></div>
-
-            <!-- BODY -->
-            <div class="type-row">
-                <div class="type-label">Body & UI</div>
-                <div class="type-example">
-                    <span style="font-family: 'Inter', sans-serif; font-weight: 400; font-size: 2.5rem; line-height: 1.1;">Inter</span>
-                    <div style="margin-top: 15px; display: flex; gap: 10px;">
-                        <span class="type-badge">Regular (400)</span>
-                        <span class="type-badge">Semi-Bold (600)</span>
-                    </div>
-                    <p style="font-size: 0.9rem; color: #666; margin-top: 15px;">
-                        The industry standard for readability. It disappears so the data (Salary, Growth, Skills) stands out.
-                    </p>
-                </div>
-                <div class="type-preview" style="font-family: 'Inter', sans-serif; font-weight: 400;">Aa Bb Cc</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ACCESSIBILITY BADGE -->
-    <div style="margin-top: 40px; display: inline-flex; align-items: center; gap: 10px; background: #eefdf0; padding: 10px 20px; border-radius: 50px; border: 1px solid #bbf7c6;">
-        <span style="color: #168a2d; font-size: 1.2rem;">✔</span>
-        <span style="color: #0f511c; font-size: 0.85rem; font-weight: 600;">Passed WCAG AA Standards for Color Contrast</span>
-    </div>
-
 </section>
 
-<!-- BLUEPRINT / USER FLOW -->
-<section id="solution" class="container">
-<div class="spacer-sm"></div>
-<div style="background: #F4F4F4; padding: clamp(20px, 4vw, 60px); border-radius: var(--radius); text-align: center; border: 1px dashed #CCC;">
-<span class="chapter-label" style="border:none; padding:0; display:block; margin-bottom:15px;">The Blueprint</span>
-<h3 class="headline-md">From App to Real World.</h3>
-<p style="max-width: 600px; margin: 0 auto 40px auto; color: #666;">
-Mapping the user journey ensuring the transition from digital booking to physical work is seamless.
-</p>
-
-<div style="display: flex; flex-direction: column; gap: 20px; text-align: left; margin-top: 40px;">
-
-<!-- PHASE 1 -->
-<div style="display: flex; gap: 20px; align-items: start;">
-<div style="background: var(--mustard); color: #fff; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;">1</div>
-<div>
-<h4 style="margin-bottom: 5px; font-size: 1.1rem;">Netflix-Style Discovery</h4>
-<p style="font-size: 0.9rem; margin-bottom: 0;">Students browse POV trailers of careers. They drag-and-drop jobs into their "Summer Calendar."</p>
-</div>
-</div>
-
-<div style="width: 2px; height: 30px; background: #ddd; margin-left: 20px;"></div>
-
-<!-- PHASE 2 -->
-<div style="display: flex; gap: 20px; align-items: start;">
-<div style="background: var(--ink-primary); color: #fff; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;">2</div>
-<div>
-<h4 style="margin-bottom: 5px; font-size: 1.1rem;">The Gear Drop (Phygital)</h4>
-<p style="font-size: 0.9rem; margin-bottom: 0;">Booking triggers a physical "Loot Crate" delivery. It contains the Uniform and a QR Lanyard for workplace access.</p>
-</div>
-</div>
-
-<div style="width: 2px; height: 30px; background: #ddd; margin-left: 20px;"></div>
-
-<!-- PHASE 3 -->
-<div style="display: flex; gap: 20px; align-items: start;">
-<div style="background: var(--ink-primary); color: #fff; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;">3</div>
-<div>
-<h4 style="margin-bottom: 5px; font-size: 1.1rem;">Triangulated Analysis</h4>
-<p style="font-size: 0.9rem; margin-bottom: 0;">We measure <b>Tone of Voice (NLP)</b> + <b>Task Completion Speed</b> + <b>Self-Reported Mood</b> to gauge true aptitude. (Privacy-First approach).</p>
-</div>
-</div>
-
-<div style="width: 2px; height: 30px; background: #ddd; margin-left: 20px;"></div>
-
-<!-- PHASE 4 -->
-<div style="display: flex; gap: 20px; align-items: start;">
-<div style="background: #fff; border: 2px solid var(--mustard); color: var(--mustard-text); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;">4</div>
-<div>
-<h4 style="margin-bottom: 5px; font-size: 1.1rem;">The Skill Radar Graph</h4>
-<p style="font-size: 0.9rem; margin-bottom: 0;">Data is converted into a visual graph showing the student's natural aptitude, helping parents trust the career choice.</p>
-</div>
-</div>
-
-</div>
-</section>
-
-<!-- 05. SOLUTION WALKTHROUGH -->
-<section id="ui" class="container">
-<div class="spacer"></div>
-<div style="text-align: center; max-width: 700px; margin: 0 auto 80px auto;">
-<span class="chapter-label" style="display:inline-block;">05 / The Solution</span>
-<h2 class="headline-md">The Ecosystem.</h2>
-<p>A seamless loop between the App (Discovery) and the World (Experience).</p>
-</div>
-
-<!-- Step 1: Marketplace -->
-<div class="grid-2">
-<div>
-<span class="chapter-label" style="border:none; padding:0; color:#888;">Step 01</span>
-<h3 class="headline-md" style="font-size: 2rem;">The "Marketplace"</h3>
-<p>No boring text. The "Profession Dictionary" lives inside these dynamic cards. Students browse careers via high-energy POV video trailers.</p>
-<div style="margin-top: 20px; font-size: 0.9rem; color: var(--mustard-text);">➔ Interaction: Drag & Drop Calendar Planning</div>
-</div>
-<div class="phone-frame interactive">
-<img src="careers.jpeg" alt="Marketplace Screen showing Culinary Arts">
-</div>
-</div>
-
-<div class="spacer-sm"></div>
-
-<!-- Step 2: Physical (Box) -->
-<div class="grid-2">
-<div class="box-render interactive">
-<img src="gear.png" alt="Physical Loot Crate containing Apron and Lanyard">
-</div>
-<div>
-<span class="chapter-label" style="border:none; padding:0; color:#888;">Step 02</span>
-<h3 class="headline-md" style="font-size: 2rem;">The "Loot Crate"</h3>
-<p>Digital apps are passive. Real careers are active. Booking a slot triggers a physical delivery 48 hours before the start date.</p>
-<p><b>The Insight:</b> Wearing the apron/uniform creates a psychological shift from "Student" to "Professional." It builds muscle memory.</p>
-</div>
-</div>
-
-<div class="spacer-sm"></div>
-
-<!-- Step 3: Analysis -->
-<div class="grid-2">
-<div>
-<span class="chapter-label" style="border:none; padding:0; color:#888;">Step 03</span>
-<h3 class="headline-md" style="font-size: 2rem;">Data: The Radar Graph</h3>
-<p>Traditional tests measure memory. Sandbox Semester measures <b>Aptitude</b>.</p>
-<p>The app triangulates <b>Voice Stress</b> and <b>Completion Rate</b> to detect Flow State.</p>
-<p><b>The Output:</b> A Skill Radar Graph showing <i>Grit, Logic, and Creativity.</i></p>
-</div>
-<div class="phone-frame interactive">
-<img src="analyis.jpeg" alt="Analysis Screen showing Radar Graph">
-</div>
-</div>
-</section>
-<!-- 06. THE PARENT ECOSYSTEM -->
-<section id="parents" class="container">
+<!-- 06. AI IxD: HOW IT WORKS -->
+<section id="ai-ixd" class="container">
     <div class="spacer"></div>
-    <div class="grid-2">
-        
-        <!-- VISUAL: NOTIFICATION STACK -->
-        <div class="notif-stack">
-            <!-- Notification 1: Market Data -->
-            <div class="notif-card">
-                <div class="notif-icon">📈</div>
-                <div style="flex:1;">
-                    <h5 style="font-size:0.9rem; font-weight:700; margin-bottom:4px;">Scope Alert</h5>
-                    <p style="font-size:0.8rem; margin:0; color:#666;">Did you know? The Culinary Industry in India is projected to grow by 12% next year.</p>
+    <div class="grid-12">
+        <div class="span-6 reveal">
+            <span class="tag-mono">AI Interaction Design</span>
+            <h2 class="headline">How I used Voice AI.</h2>
+            <p class="lead">I didn't want the AI to be a black box. I used it to figure out if students were <b>actually enjoying</b> the tasks through their tone and confidence.</p>
+            
+            <div class="ai-viz-frame">
+                <div style="font-family: var(--font-mono); font-size: 10px; color: var(--ink-low); margin-bottom: 25px;">[ SYSTEM_STATUS: MONITORING_TONE ]</div>
+                <div class="waveform-wrap">
+                    <div class="waveform-bar" style="animation-delay: 0.1s;"></div>
+                    <div class="waveform-bar" style="animation-delay: 0.3s;"></div>
+                    <div class="waveform-bar" style="animation-delay: 0.5s;"></div>
+                    <div class="waveform-bar" style="animation-delay: 0.2s;"></div>
+                    <div class="waveform-bar" style="animation-delay: 0.4s;"></div>
+                    <div class="waveform-bar" style="animation-delay: 0.1s;"></div>
                 </div>
             </div>
-
-            <!-- Notification 2: Progress Update -->
-            <div class="notif-card">
-                <div class="notif-icon">✅</div>
-                <div style="flex:1;">
-                    <h5 style="font-size:0.9rem; font-weight:700; margin-bottom:4px;">Milestone Unlocked</h5>
-                    <p style="font-size:0.8rem; margin:0; color:#666;">Ishan just completed the "Knife Skills" module. View his Video Log.</p>
-                </div>
-            </div>
-
-            <!-- Notification 3: Education -->
-            <div class="notif-card">
-                <div class="notif-icon">📰</div>
-                <div style="flex:1;">
-                    <h5 style="font-size:0.9rem; font-weight:700; margin-bottom:4px;">Myth Buster</h5>
-                    <p style="font-size:0.8rem; margin:0; color:#666;">Read: "Why modern Design careers are as stable as Engineering."</p>
-                </div>
+            <p style="font-size: 14px; color: var(--ink-mid); margin-top: 30px;">
+                <b>The Waveform Ritual:</b> The UI only shows this blue wave when the student is recording a summary. It signals transparency—telling them exactly when the AI is listening.
+            </p>
+        </div>
+        <div class="span-6 reveal">
+            <div class="phone-mock">
+                <img src="analyis.jpeg" alt="Aptitude Radar Chart Interface">
             </div>
         </div>
-
-        <!-- TEXT CONTENT -->
-        <div>
-            <span class="chapter-label">06 / The Secondary User</span>
-            <h2 class="headline-md">Designing for the "Gatekeeper."</h2>
-            <p>If the parent says "No," the product fails. I designed a passive <b>Parent Notification System</b> to build trust without being intrusive.</p>
-            <p>Instead of just seeing "Grades," parents receive <b>Scope Articles</b> and <b>Progress Updates</b>. This educates them on the viability of non-traditional careers, solving the "Trust Gap" identified in the research.</p>
-        </div>
-
     </div>
 </section>
 
-<!-- NEW SECTION: BUSINESS VIABILITY -->
-<section id="parent" class="container">
-<div class="spacer"></div>
-<div class="reading-width">
-<span class="chapter-label">06 / Business Viability</span>
-<h2 class="headline-md">Who pays for the box?</h2>
-<p>A physical "Loot Crate" model is expensive logistically. To ensure scalability and affordability, the business model relies on a <b>Tri-Party Ecosystem</b>.</p>
-</div>
-
-<div class="grid-3" style="margin-top: 50px;">
-<div style="background: #fff; padding: 30px; border-radius: 12px; border: 1px solid #eee; height: 100%;">
-<div style="width: 40px; height: 40px; background: #000; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-bottom: 20px;">$</div>
-<h4 style="font-size: 1.1rem; margin-bottom: 10px;">The Revenue Model</h4>
-<p style="font-size: 0.9rem; color: #555; margin-bottom: 15px;"><b>Freemium + Transactional.</b></p>
-<ul style="font-size: 0.85rem; color: #666; padding-left: 20px; line-height: 1.6;">
-<li><b>App (Free):</b> Low barrier to entry. Acts as a lead magnet.</li>
-<li><b>Kit (Paid):</b> Parents pay per "Experience." This lowers risk compared to paying a massive annual counselor fee.</li>
-</ul>
-</div>
-
-<div style="background: #fff; padding: 30px; border-radius: 12px; border: 1px solid #eee; height: 100%;">
-<div style="width: 40px; height: 40px; background: var(--mustard); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-bottom: 20px;">%</div>
-<h4 style="font-size: 1.1rem; margin-bottom: 10px;">The Cost Subsidy</h4>
-<p style="font-size: 0.9rem; color: #555; margin-bottom: 15px;"><b>Corporate Sponsorship.</b></p>
-<p style="font-size: 0.85rem; color: #666; line-height: 1.6;">
-The "Chef Kit" isn't just a product; it's a marketing channel. Brands (e.g., Masterchef) subsidize the cost of the box for brand placement.
-</p>
-</div>
-
-<div style="background: #fff; padding: 30px; border-radius: 12px; border: 1px solid #eee; height: 100%;">
-<div style="width: 40px; height: 40px; background: #000; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-bottom: 20px;">⭯</div>
-<h4 style="font-size: 1.1rem; margin-bottom: 10px;">Scalability (B2B)</h4>
-<p style="font-size: 0.9rem; color: #555; margin-bottom: 15px;"><b>School Partnerships.</b></p>
-<p style="font-size: 0.85rem; color: #666; line-height: 1.6;">
-By selling B2B to schools, we ship "Classroom Packs" (30 kits at once), reducing logistics costs by ~40%.
-</p>
-</div>
-</div>
+<!-- 07. THE GATEKEEPER: PARENT SYSTEM -->
+<section id="gatekeeper" class="container">
+    <div class="spacer"></div>
+    <div class="grid-12">
+        <div class="span-6 reveal">
+            <div class="parent-notif-stack">
+                <!-- NOTIF 1 -->
+                <div class="parent-notif-card" style="top: 0; z-index: 3;">
+                    <span class="tag-mono" style="font-size: 10px;">Career Milestone</span>
+                    <h4 style="margin-top: 10px;">Ishan completed "Kitchen Ops 101"</h4>
+                    <p style="margin-top: 10px; font-size: 14px; color: var(--ink-mid);">Manual Dexterity detected: 92%. Skill ROI matches high-growth Culinary Lead roles.</p>
+                </div>
+                <!-- NOTIF 2 -->
+                <div class="parent-notif-card" style="top: 130px; z-index: 2;">
+                    <span class="tag-mono" style="font-size: 10px; color: var(--ai-blue);">Industry Opportunity</span>
+                    <h4 style="margin-top: 10px;">Modern Design Scope: +15% Growth</h4>
+                    <p style="margin-top: 10px; font-size: 14px; color: var(--ink-mid);">Median starting salary for Creative leads in India: ₹12L PA.</p>
+                </div>
+                <!-- NOTIF 3 -->
+                <div class="parent-notif-card" style="top: 260px; z-index: 1;">
+                    <span class="tag-mono" style="font-size: 10px;">Safety Analysis</span>
+                    <h4 style="margin-top: 10px;">Is Design "Safe"? Read Report.</h4>
+                    <p style="margin-top: 10px; font-size: 14px; color: var(--ink-mid);">Comparing financial stability of modern Design vs. traditional Engineering.</p>
+                </div>
+            </div>
+        </div>
+        <div class="span-6 reveal" style="display: flex; flex-direction: column; justify-content: center;">
+            <span class="tag-mono">07 / The Gatekeeper</span>
+            <h2 class="headline">Designing for Trust.</h2>
+            <p class="lead">Parents are the decision-makers. If they say "No," the product dies. I designed a <b>Passive Trust Layer</b> that sends data, scope, and progress videos directly to parents to turn their "Anxiety" into "Proof."</p>
+        </div>
+    </div>
 </section>
 
-<!-- 07. IMPACT & LEARNINGS -->
-<section id="impact" class="container">
-<div class="spacer"></div>
-<div style="background: var(--ink-primary); color: #fff; padding: clamp(30px, 5vw, 60px); border-radius: var(--radius);">
-<div style="text-align: center; margin-bottom: 50px;">
-<h2 style="color: #fff; margin-bottom: 10px;">The Outcomes</h2>
-<p style="color: #999; max-width: 600px; margin: 0 auto;">
-Testing with 15 students and 5 parents revealed a clear divergence between "Passive Watching" (App) and "Active Doing" (Kit).
-</p>
-</div>
-
-<div class="grid-2" style="align-items: flex-start;">
-<!-- METRIC 1 -->
-<div style="border-right: 1px solid rgba(255,255,255,0.1); padding-right: clamp(0px, 2vw, 40px);">
-<div style="font-family: var(--font-brand); font-size: clamp(2.5rem, 4vw, 3.5rem); color: var(--mustard); font-weight: 700; line-height: 1; margin-bottom: 15px;">
-80% <span style="font-size: 1.5rem; color: #666; font-weight: 400;">vs</span> 40%
-</div>
-<h4 style="color: #fff; font-size: 1.1rem; margin-bottom: 15px;">Retention Rate (Kit vs. Video)</h4>
-<p style="font-size: 0.9rem; color: #aaa; line-height: 1.6; margin-bottom: 0;">
-<b>The Insight:</b> While 60% of students dropped off during the passive "Video Trailers," 12 out of 15 students completed the entire physical "Knife Skills" module.
-</p>
-</div>
-
-<!-- METRIC 2 -->
-<div style="padding-left: clamp(0px, 2vw, 40px);">
-<div style="font-family: var(--font-brand); font-size: clamp(2rem, 4vw, 3.5rem); color: var(--mustard); font-weight: 700; line-height: 1; margin-bottom: 15px;">
-"Is he good?"
-</div>
-<h4 style="color: #fff; font-size: 1.1rem; margin-bottom: 15px;">Shift in Parent Dialogue</h4>
-<p style="font-size: 0.9rem; color: #aaa; line-height: 1.6; margin-bottom: 0;">
-<b>The Insight:</b> Before the app, parent questions were financial (<i>"Does this pay?"</i>). After seeing the 'Scope Reports' and video logs, questions shifted to aptitude.
-</p>
-</div>
-</div>
-</div>
+<!-- 08. PHYGITAL LOOP -->
+<section id="loop" class="container">
+    <div class="spacer"></div>
+    <div style="text-align: center; margin-bottom: 100px;">
+        <span class="tag-mono">08 / The Ecosystem Loop</span>
+        <h2 class="headline">From Discovery to Reality.</h2>
+    </div>
+    
+    <div class="grid-12">
+        <div class="card span-6 reveal">
+            <span class="tag-mono">Step 01 / Digital</span>
+            <h3>Marketplace Discovery</h3>
+            <p style="color: var(--ink-mid); margin: 25px 0;">Students browse POV Trailers of professions. Drag-and-drop mechanics make scheduling feel like building a playlist.</p>
+            <div class="phone-mock">
+                <img src="careers.jpeg" alt="Discovery Interface">
+            </div>
+        </div>
+        <div class="card span-6 reveal">
+            <span class="tag-mono">Step 02 / Physical</span>
+            <h3>The Gear Ritual</h3>
+            <p style="color: var(--ink-mid); margin: 25px 0;">Booking triggers a delivery. The professional kit creates a psychological shift from "Student" to "Professional."</p>
+            <div class="kit-render">
+                <img src="gear.png" alt="Tactile Loot Crate Render">
+            </div>
+        </div>
+    </div>
 </section>
 
-<!-- 08. EDGE CASES & FRICTION -->
+<!-- 09. OUTCOMES: THE HUD DASHBOARD -->
+<section id="outcomes" class="container outcome-section">
+    <div class="spacer"></div>
+    <span class="tag-mono">09 / Final Outcomes</span>
+    <h2 class="headline">Measuring the Pilot.</h2>
+    <p class="lead">I tested this with 15 students in a closed dehradun pilot. The shift in confidence was measurable.</p>
+
+    <div class="outcome-grid reveal">
+        <!-- STAT 1 -->
+        <div class="outcome-hud-card">
+            <span class="tag-mono" style="font-size: 10px;">Honest Retention</span>
+            <div class="outcome-stat-xl counter-target" data-val="80">0%</div>
+            <p class="outcome-desc">12 out of 15 students finished every physical module, compared to a typical 15% retention rate in digital-only courses.</p>
+            <div class="outcome-graph-box">
+                <div class="bar-entity active" style="height: 80%;"></div>
+                <div class="bar-entity" style="height: 40%;"></div>
+                <div class="bar-entity" style="height: 25%;"></div>
+                <div class="bar-entity active" style="height: 90%;"></div>
+                <div class="bar-entity" style="height: 60%;"></div>
+            </div>
+        </div>
+
+        <!-- STAT 2 -->
+        <div class="outcome-hud-card">
+            <span class="tag-mono" style="font-size: 10px;">Career Risk Avoidance</span>
+            <div class="outcome-stat-xl" style="color: var(--success-green);">₹8L</div>
+            <p class="outcome-desc">Average potential tuition savings by preventing students from enrolling in degrees they realized they disliked during the simulator.</p>
+            <div style="margin-top: 40px; border-top: 1px solid #333; padding-top: 25px; font-family: var(--font-mono); font-size: 11px; color: var(--mustard);">
+                >> STATUS: ROI_GENERATION_COMPLETE
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 10. FINAL ARTIFACT MAP -->
 <section class="container">
-<div class="spacer"></div>
-<div class="reading-width">
-<span class="chapter-label">08 / Edge Cases & Friction</span>
-<h2 class="headline-md">Designing for the Margins.</h2>
-<p>A product isn't finished until it handles failure gracefully. I stress-tested the "Happy Path" to find potential pitfalls.</p>
-</div>
-
-<div class="grid-3" style="margin-top: 50px;">
-<!-- 1. FAILURE STATE (PSYCHOLOGY) -->
-<div class="insight-card" style="border-left: 4px solid #D93025;">
-<h4 style="font-size: 1.1rem; margin-bottom: 15px;">The "Happy Failure" State</h4>
-<p style="font-size: 0.85rem; color: #555; margin-bottom: 10px;"><b>Scenario:</b> A student tries the "Coding Kit," hates it, and gets a low aptitude score.</p>
-<p style="font-size: 0.85rem; color: #555;"><b>The UX Pivot:</b> Standard apps show red text ("Low Score"). I reframed this as a <b>Financial Win</b>: "You just saved ₹8 Lakhs on a degree you wouldn't enjoy."</p>
-</div>
-
-<!-- 2. PRIVACY FIRST (THE TECH PIVOT) -->
-<div class="insight-card" style="border-left: 4px solid var(--mustard);">
-<h4 style="font-size: 1.1rem; margin-bottom: 15px;">Pivot: No Facial Scanning</h4>
-<p style="font-size: 0.85rem; color: #555; margin-bottom: 10px;"><b>Concept:</b> Initially considered facial recognition for sentiment.</p>
-<p style="font-size: 0.85rem; color: #555;"><b>Why I Killed It:</b> Privacy risks with minors. Switched to <b>Voice Tone Analysis</b> which is less invasive and more reliable on low-end hardware.</p>
-</div>
-
-<!-- 3. ACCESSIBILITY -->
-<div class="insight-card" style="border-left: 4px solid #222;">
-<h4 style="font-size: 1.1rem; margin-bottom: 15px;">Accessibility: Audio First</h4>
-<p style="font-size: 0.85rem; color: #555; margin-bottom: 10px;"><b>Constraint:</b> Users cannot touch the screen while their hands are covered in clay, grease, or food.</p>
-<p style="font-size: 0.85rem; color: #555;"><b>The Solution:</b> Implemented <b>"Wave to Pause"</b> (gesture control) and Auto-Subtitles for noisy workshops.</p>
-</div>
-</div>
+    <div class="spacer"></div>
+    <div style="text-align: center; margin-bottom: 80px;">
+        <span class="tag-mono">The Finished Product</span>
+        <h2 class="headline">Every Touchpoint.</h2>
+    </div>
+    
+    <div class="card reveal" style="padding: 60px; background: #080808;">
+        <img src="career all screens.jpg" style="width:100%; border-radius: 20px; box-shadow: 0 50px 100px #000;" alt="Full High Fidelity Map">
+        <div style="margin-top: 30px; text-align: center; font-size: 12px; color: var(--ink-low);">
+            FIG 3: Final Interface Map - 45+ Screen iterations based on user feedback.
+        </div>
+    </div>
 </section>
 
-<!-- ALL SCREENS -->
+<!-- 11. DESIGNER'S REFLECTION -->
 <section class="container">
-<div class="spacer-sm"></div>
-<div style="text-align: center; margin-bottom: 60px;">
-<span class="chapter-label" style="display:inline-block; border:none; padding:0;">High Fidelity</span>
-<h2 class="headline-md">All Screens.</h2>
-<p style="color: var(--ink-secondary);">A bird's eye view of the complete user journey.</p>
-</div>
-
-<div class="interactive" style="width: 100%; background-color: #F4F4F4; border-radius: var(--radius); padding: clamp(20px, 5vw, 60px); border: 1px solid #eee; box-shadow: 0 20px 60px rgba(0,0,0,0.05);">
-<img src="career all screens.jpg" alt="Full UI Screen Collection" style="width: 100%; height: auto; display: block; border-radius: 8px;">
-</div>
+    <div class="reflection-card reveal">
+        <span class="tag-mono">Process Reflection</span>
+        <h3 style="font-size: 2.2rem; font-weight: 800; margin-bottom: 25px;">A note on the tools.</h3>
+        <p style="color: var(--ink-mid); max-width: 900px;">
+            I used AI to help me structure this case-study code and refine the visual scrollytelling, but the core insights about Indian parental gatekeeping came from 25+ hours of manual interviews and shadowing in Dehradun. I learned that UX design isn't just about the screen—it's about the social context in which the screen lives.
+        </p>
+    </div>
 </section>
 
-<div class="spacer"></div>
-
-<footer style="text-align: center; padding-bottom: 100px;">
-<p style="color: #888;">Next Case Study</p>
-<a href="style.html" style="font-family: var(--font-head); font-weight: 800; font-size: 2rem; text-decoration: none; color: var(--ink-primary);">Ai stylist app -></a>
+<footer>
+    <div class="container">
+        <p class="tag-mono" style="margin-bottom: 24px;">Thank you for your time</p>
+        <a href="style.html" class="footer-cta">NEXT PROJECT <span>AI stylist →</span></a>
+        <div style="margin-top: 120px; opacity: 0.3; font-family: var(--font-mono); font-size: 11px;">DESIGNED & CODED BY EESHITVAA // 2025 // VOL 01</div>
+    </div>
 </footer>
 
-<!-- SCRIPT FOR CURSOR -->
 <script>
-if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
-const dot = document.querySelector('.cursor-dot');
-const outline = document.querySelector('.cursor-outline');
+    /* 
+       --- ENGINE 1: LENIS SMOOTH SCROLLING ---
+    */
+    const lenis = new Lenis({
+        lerp: 0.1,
+        smoothWheel: true
+    });
 
-let mx = 0, my = 0;
-let ox = 0, oy = 0;
+    function raf(time) {
+        lenis.raf(time);
+        requestAnimationFrame(raf);
+    }
+    requestAnimationFrame(raf);
 
-document.addEventListener('mousemove', e => {
-mx = e.clientX;
-my = e.clientY;
-dot.style.top = `${my}px`;
-dot.style.left = `${mx}px`;
-});
+    /* 
+       --- ENGINE 2: KINETIC CURSOR LOGIC ---
+    */
+    const ball = document.getElementById('cursor-ball');
+    const outline = document.getElementById('cursor-outline');
+    
+    // Only add cursor events on non-touch devices
+    if (window.matchMedia("(pointer: fine)").matches) {
+        document.addEventListener('mousemove', (e) => {
+            gsap.to(ball, { x: e.clientX, y: e.clientY, duration: 0.1 });
+            gsap.to(outline, { x: e.clientX - 22, y: e.clientY - 22, duration: 0.4 });
+        });
+    } else {
+        // Hide custom cursor elements on touch devices immediately
+        ball.style.display = 'none';
+        outline.style.display = 'none';
+    }
 
-function animateCursor() {
-ox += (mx - ox) * 0.15;
-oy += (my - oy) * 0.15;
-outline.style.top = `${oy}px`;
-outline.style.left = `${ox}px`;
-requestAnimationFrame(animateCursor);
-}
-animateCursor();
+    /* 
+       --- ENGINE 3: THREE.JS 3D MUSTARD CUBE ---
+    */
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ 
+        canvas: document.getElementById('cube-canvas'), 
+        alpha: true, 
+        antialias: true 
+    });
+    renderer.setSize(window.innerWidth, window.innerHeight);
 
-const interactives = document.querySelectorAll('.interactive, a, button');
-interactives.forEach(el => {
-el.addEventListener('mouseenter', () => document.body.classList.add('hovering'));
-el.addEventListener('mouseleave', () => document.body.classList.remove('hovering'));
-});
-}
+    // UPDATED: Cube Geometry using RoundedBoxGeometry
+    // args: width, height, depth, segments, radius
+    const geometry = new THREE.RoundedBoxGeometry(2, 2, 2, 4, 0.25);
+    
+    const material = new THREE.MeshPhongMaterial({ 
+        color: 0xFFD60A, 
+        shininess: 100,
+        specular: 0x555555
+    });
+    const cube = new THREE.Mesh(geometry, material);
+    scene.add(cube);
+
+    // Lighting System
+    const light = new THREE.DirectionalLight(0xffffff, 1.2);
+    light.position.set(5, 5, 5);
+    scene.add(light);
+    scene.add(new THREE.AmbientLight(0x404040, 0.6));
+
+    camera.position.z = 5;
+
+    function animateCube() {
+        requestAnimationFrame(animateCube);
+        cube.rotation.x += 0.003;
+        cube.rotation.y += 0.004;
+        renderer.render(scene, camera);
+    }
+    animateCube();
+
+    // Cube Scroll Interaction: Translating Cube based on vertical scroll
+    window.addEventListener('scroll', () => {
+        const scrollPercent = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight);
+        
+        gsap.to(cube.position, {
+            x: Math.sin(scrollPercent * Math.PI * 2) * 3.5,
+            y: Math.cos(scrollPercent * Math.PI) * 1.5,
+            z: Math.sin(scrollPercent * 6) * 1.5,
+            duration: 1.2,
+            ease: "power2.out"
+        });
+        
+        gsap.to(cube.rotation, {
+            y: scrollPercent * Math.PI * 4,
+            duration: 0.5
+        });
+    });
+
+    /* 
+       --- ENGINE 4: GSAP MOTION GRAPHICS ---
+    */
+    gsap.registerPlugin(ScrollTrigger);
+
+    // Section Revelations
+    document.querySelectorAll('.reveal').forEach(el => {
+        gsap.to(el, {
+            scrollTrigger: {
+                trigger: el,
+                start: "top 85%"
+            },
+            opacity: 1,
+            y: 0,
+            duration: 1.4,
+            ease: "power4.out"
+        });
+    });
+
+    // 5-Whys Scrollytelling Timeline
+    const timelineSteps = document.querySelectorAll('.timeline-step');
+    timelineSteps.forEach(step => {
+        ScrollTrigger.create({
+            trigger: step,
+            start: "top 70%",
+            onEnter: () => step.classList.add('active'),
+            onLeaveBack: () => step.classList.remove('active')
+        });
+    });
+
+    // Outcome & HUD Counters
+    document.querySelectorAll('.counter-target, .hud-value').forEach(stat => {
+        const target = parseInt(stat.getAttribute('data-val'));
+        if(!target) return;
+        
+        ScrollTrigger.create({
+            trigger: stat,
+            start: "top 90%",
+            onEnter: () => {
+                let obj = { n: 0 };
+                gsap.to(obj, {
+                    n: target, duration: 2, 
+                    onUpdate: () => stat.innerText = Math.floor(obj.n) + "%"
+                });
+            }
+        });
+    });
+
+    // HUD Data Fill Fills
+    document.querySelectorAll('.hud-fill-bar, .bar-entity').forEach(bar => {
+        const w = bar.getAttribute('data-w') || "100%";
+        gsap.to(bar, {
+            scrollTrigger: {
+                trigger: bar,
+                start: "top 95%"
+            },
+            width: w,
+            height: bar.classList.contains('bar-entity') ? bar.style.height : '100%',
+            duration: 2.5,
+            ease: "expo.out"
+        });
+    });
+
+    // Parent Notification Sequence
+    // Disable animation on mobile where they stack statically
+    if (window.innerWidth > 768) {
+        gsap.to(".parent-notif-card", {
+            scrollTrigger: {
+                trigger: ".parent-notif-stack",
+                start: "top 65%"
+            },
+            opacity: 1,
+            y: 0,
+            stagger: 0.5,
+            duration: 1.2,
+            ease: "back.out(1.7)"
+        });
+    } else {
+        // Ensure opacity 1 for mobile static stack
+        gsap.set(".parent-notif-card", { opacity: 1, y: 0 });
+    }
+
+    // Handle Window Resizing for Three.js
+    window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        
+        // Refresh ScrollTrigger on resize
+        ScrollTrigger.refresh();
+    });
+
 </script>
 </body>
 </html>
+
 
 
 
